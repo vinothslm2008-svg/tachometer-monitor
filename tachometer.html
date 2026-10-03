@@ -1,0 +1,1463 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tachometer Monitor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+       RESET & TOKENS
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:          #0b1220;
+      --surface:     #111d33;
+      --surface2:    #16253d;
+      --border:      #1e3054;
+      --accent:      #ff9f1a;
+      --accent-dim:  #cc7d12;
+      --green:       #22c55e;
+      --red:         #ef4444;
+      --text:        #e2e8f0;
+      --text-muted:  #64748b;
+      --text-dim:    #94a3b8;
+      --font:        'Inter', 'Roboto', sans-serif;
+      --radius:      14px;
+      --radius-sm:   8px;
+    }
+
+    html, body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      min-height: 100dvh;
+      overflow-x: hidden;
+    }
+
+    /* ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+       SPLASH SCREEN
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
+    #splash {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      z-index: 1000;
+      transition: opacity 0.7s ease, visibility 0.7s ease;
+    }
+    #splash.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+    .splash-logo {
+      width: 100px; height: 100px;
+      border-radius: 50%;
+      border: 3px solid var(--accent);
+      display: flex; align-items: center; justify-content: center;
+      animation: pulse-ring 1.5s ease-in-out infinite;
+    }
+    .splash-logo svg { width: 60px; height: 60px; }
+    @keyframes pulse-ring {
+      0%,100% { box-shadow: 0 0 0 0 rgba(255,159,26,0.4); }
+      50%      { box-shadow: 0 0 0 16px rgba(255,159,26,0); }
+    }
+    .splash-title {
+      font-size: 1.5rem; font-weight: 700; letter-spacing: 0.12em;
+      color: var(--text);
+    }
+    .splash-sub { color: var(--text-muted); font-size: 0.9rem; letter-spacing: 0.05em; }
+    .splash-dots span {
+      display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+      background: var(--accent); margin: 0 3px;
+      animation: dot-bounce 1.2s ease-in-out infinite;
+    }
+    .splash-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .splash-dots span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes dot-bounce { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-8px)} }
+
+    /* ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+       MAIN LAYOUT
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
+    #app {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+       HEADER
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
+    header {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .header-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .app-title {
+      font-size: 1.15rem; font-weight: 700;
+      letter-spacing: 0.08em;
+      color: var(--text);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .app-title .dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--accent);
+      animation: blink 2s ease infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+    /* Connection row */
+    .conn-row {
+      display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+    }
+    .conn-row input[type="text"] {
+      flex: 1; min-width: 120px;
+      padding: 9px 12px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text); font-family: var(--font); font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .conn-row input[type="text"]:focus { border-color: var(--accent); }
+
+    .btn {
+      padding: 9px 18px;
+      border: none; border-radius: var(--radius-sm);
+      font-family: var(--font); font-size: 0.88rem; font-weight: 600;
+      cursor: pointer; transition: background 0.2s, transform 0.1s;
+      letter-spacing: 0.03em;
+    }
+    .btn:active { transform: scale(0.96); }
+    .btn-accent {
+      background: var(--accent); color: #000;
+    }
+    .btn-accent:hover { background: #ffb84d; }
+    .btn-outline {
+      background: transparent; color: var(--accent);
+      border: 1.5px solid var(--accent);
+    }
+    .btn-outline:hover { background: rgba(255,159,26,0.08); }
+    .btn-ghost {
+      background: var(--surface2); color: var(--text-dim);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover { background: var(--border); }
+    .btn-danger {
+      background: transparent; color: var(--red);
+      border: 1.5px solid var(--red);
+    }
+    .btn-danger:hover { background: rgba(239,68,68,0.1); }
+
+    /* Status pill */
+    .status-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .status-pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 4px 12px; border-radius: 999px;
+      font-size: 0.78rem; font-weight: 600; letter-spacing: 0.04em;
+      border: 1.5px solid var(--border);
+      color: var(--text-muted);
+      transition: all 0.3s;
+    }
+    .status-pill .pill-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--text-muted); transition: background 0.3s;
+    }
+    .status-pill.connected, .status-pill.demo {
+      border-color: var(--green); color: var(--green);
+    }
+    .status-pill.connected .pill-dot, .status-pill.demo .pill-dot {
+      background: var(--green);
+      animation: blink 1.5s ease infinite;
+    }
+    .status-pill.connecting {
+      border-color: var(--accent); color: var(--accent);
+    }
+    .status-pill.connecting .pill-dot {
+      background: var(--accent);
+      animation: blink 0.8s ease infinite;
+    }
+
+    /* ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+       ALERT BANNER
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
+    #alert-banner {
+      display: none;
+      background: rgba(239,68,68,0.12);
+      border: 1.5px solid var(--red);
+      border-radius: var(--radius-sm);
+      padding: 10px 16px;
+      color: var(--red);
+      font-size: 0.88rem; font-weight: 600;
+      align-items: center; gap: 8px;
+      animation: shake 0.4s ease;
+    }
+    #alert-banner.visible { display: flex; }
+    @keyframes shake {
+      0%,100%{transform:translateX(0)} 25%{transform:translateX(-4px)} 75%{transform:translateX(4px)}
+    }
+    #alert-banner .alert-icon { font-size: 1.1rem; }
+
+    /* ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+       CARDS
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+    .card-title {
+      font-size: 0.8rem; font-weight: 600;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--text-muted); margin-bottom: 16px;
+    }
+
+    /* ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+       GAUGE CARD
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
+    .gauge-wrap {
+      display: flex; justify-content: center;
+      margin-bottom: 16px;
+    }
+    #gauge-canvas {
+      max-width: 300px; width: 100%;
+      height: auto;
+    }
+
+    /* Stat tiles row */
+    .stat-tiles {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .stat-tile {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+    }
+    .stat-tile .tile-label {
+      font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+    .stat-tile .tile-value {
+      font-size: 1.3rem; font-weight: 700; color: var(--text);
+    }
+    .tile-value.running { color: var(--accent); }
+    .tile-value.idle    { color: var(--text-muted); }
+
+    /* ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+       SETTINGS CARD
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
+    .settings-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    @media (max-width: 480px) {
+      .settings-grid { grid-template-columns: 1fr; }
+    }
+    .field { display: flex; flex-direction: column; gap: 5px; }
+    .field label {
+      font-size: 0.75rem; font-weight: 600; letter-spacing: 0.05em;
+      text-transform: uppercase; color: var(--text-muted);
+    }
+    .field input[type="number"] {
+      padding: 9px 12px;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text); font-family: var(--font); font-size: 0.9rem;
+      outline: none; transition: border-color 0.2s;
+    }
+    .field input[type="number"]:focus { border-color: var(--accent); }
+    .settings-helper {
+      font-size: 0.78rem; color: var(--text-muted); margin-bottom: 14px;
+      line-height: 1.5;
+    }
+    .settings-btns { display: flex; flex-wrap: wrap; gap: 8px; }
+
+    /* ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+       HISTORY CARD
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
+    .history-header {
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 8px; margin-bottom: 14px;
+    }
+    .history-header .card-title { margin-bottom: 0; }
+    select {
+      padding: 7px 10px;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text); font-family: var(--font); font-size: 0.82rem;
+      outline: none; cursor: pointer;
+    }
+    #history-canvas {
+      width: 100%; border-radius: var(--radius-sm);
+      display: block;
+    }
+    .history-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 14px;
+    }
+    @media (max-width: 480px) {
+      .history-stats { grid-template-columns: repeat(2, 1fr); }
+    }
+    .h-stat {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 10px 12px;
+      text-align: center;
+    }
+    .h-stat .hs-label {
+      font-size: 0.68rem; font-weight: 600; letter-spacing: 0.07em;
+      text-transform: uppercase; color: var(--text-muted);
+    }
+    .h-stat .hs-val {
+      font-size: 1rem; font-weight: 700; color: var(--text);
+      margin-top: 3px; white-space: nowrap;
+    }
+
+    /* ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+       PERIODS TABLE
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
+    .periods-wrap { overflow-x: auto; }
+    table {
+      width: 100%; border-collapse: collapse;
+      font-size: 0.82rem; white-space: nowrap;
+    }
+    thead th {
+      padding: 8px 10px; text-align: left;
+      font-size: 0.7rem; font-weight: 600; letter-spacing: 0.07em;
+      text-transform: uppercase; color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+    }
+    tbody tr:nth-child(odd) { background: rgba(255,255,255,0.015); }
+    tbody tr:hover { background: rgba(255,255,255,0.03); }
+    tbody td { padding: 7px 10px; color: var(--text-dim); }
+    .state-badge {
+      display: inline-block; padding: 2px 8px;
+      border-radius: 999px; font-size: 0.72rem; font-weight: 700;
+    }
+    .state-badge.running { color: var(--accent); border: 1px solid var(--accent); }
+    .state-badge.rest    { color: var(--text-muted); border: 1px solid var(--border); }
+    .no-data {
+      text-align: center; padding: 24px;
+      color: var(--text-muted); font-size: 0.85rem;
+    }
+
+    /* ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+       CONFIRMATION MODAL
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
+    #modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.65); z-index: 900;
+      align-items: center; justify-content: center;
+    }
+    #modal-overlay.visible { display: flex; }
+    .modal {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 28px; max-width: 340px; width: 90%;
+    }
+    .modal h3 { font-size: 1rem; margin-bottom: 10px; }
+    .modal p  { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px; line-height: 1.5; }
+    .modal-btns { display: flex; gap: 10px; justify-content: flex-end; }
+
+    /* ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+       FOOTER
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
+    footer {
+      text-align: center; font-size: 0.72rem;
+      color: var(--text-muted); padding: 8px 0 20px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+     SPLASH SCREEN
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ -->
+<div id="splash">
+  <div class="splash-logo">
+    <!-- Gauge icon -->
+    <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="30" cy="30" r="26" stroke="#ff9f1a" stroke-width="2.5" stroke-dasharray="4 3"/>
+      <path d="M15 42 A18 18 0 0 1 45 42" stroke="#ff9f1a" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+      <line x1="30" y1="30" x2="42" y2="20" stroke="#ff9f1a" stroke-width="2.5" stroke-linecap="round"/>
+      <circle cx="30" cy="30" r="3" fill="#ff9f1a"/>
+    </svg>
+  </div>
+  <div class="splash-title">TACHOMETER MONITOR</div>
+  <div class="splash-sub">Starting up...</div>
+  <div class="splash-dots"><span></span><span></span><span></span></div>
+</div>
+
+<!-- ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+     CONFIRMATION MODAL
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ -->
+<div id="modal-overlay">
+  <div class="modal">
+    <h3>Clear History</h3>
+    <p>This will permanently delete all RPM history, running/rest period records, and reset stats. This cannot be undone.</p>
+    <div class="modal-btns">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-danger" onclick="confirmClear()">Clear</button>
+    </div>
+  </div>
+</div>
+
+<!-- ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+     MAIN APP
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ -->
+<div id="app">
+
+  <!-- ΓöÇΓöÇ HEADER ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ -->
+  <header>
+    <div class="header-top">
+      <div class="app-title">
+        <div class="dot"></div>
+        TACHOMETER MONITOR
+      </div>
+    </div>
+
+    <div class="conn-row">
+      <input type="text" id="device-id" placeholder="Device ID (e.g. 123468)" maxlength="20" />
+      <button class="btn btn-accent" onclick="connectDevice()">Connect</button>
+      <button class="btn btn-outline" onclick="startDemo()">Demo</button>
+    </div>
+
+    <div class="status-row">
+      <div class="status-pill" id="status-pill">
+        <div class="pill-dot"></div>
+        <span id="status-text">Disconnected</span>
+      </div>
+    </div>
+
+    <!-- Alert Banner -->
+    <div id="alert-banner">
+      <span class="alert-icon">ΓÜá</span>
+      <span id="alert-msg">RPM out of target range!</span>
+    </div>
+  </header>
+
+  <!-- ΓöÇΓöÇ LIVE RPM GAUGE CARD ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ -->
+  <div class="card">
+    <div class="card-title">Live RPM</div>
+    <div class="gauge-wrap">
+      <canvas id="gauge-canvas" width="300" height="200"></canvas>
+    </div>
+    <div class="stat-tiles">
+      <div class="stat-tile">
+        <div class="tile-label">Current RPM</div>
+        <div class="tile-value" id="tile-rpm">0</div>
+      </div>
+      <div class="stat-tile">
+        <div class="tile-label">Machine State</div>
+        <div class="tile-value idle" id="tile-state">Idle</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ΓöÇΓöÇ SETTINGS CARD ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ -->
+  <div class="card">
+    <div class="card-title">Settings</div>
+    <div class="settings-grid">
+      <div class="field">
+        <label for="set-target">Target RPM</label>
+        <input type="number" id="set-target" placeholder="e.g. 1500" min="0" max="9999" />
+      </div>
+      <div class="field">
+        <label for="set-tol">Tolerance ┬▒</label>
+        <input type="number" id="set-tol" value="50" min="0" max="1000" />
+      </div>
+      <div class="field">
+        <label for="set-idle">Idle below RPM</label>
+        <input type="number" id="set-idle" value="30" min="0" max="9999" />
+      </div>
+      <div class="field">
+        <label for="set-gmax">Gauge max</label>
+        <input type="number" id="set-gmax" value="3000" min="100" max="99999" />
+      </div>
+    </div>
+    <p class="settings-helper">
+      An alert shows and beeps when RPM leaves target ┬▒ tolerance while the machine is running.
+    </p>
+    <div class="settings-btns">
+      <button class="btn btn-accent" onclick="saveSettings()">Save settings</button>
+      <button class="btn btn-ghost"  onclick="exportCSV()">Export CSV</button>
+      <button class="btn btn-danger" onclick="openModal()">Clear history</button>
+    </div>
+  </div>
+
+  <!-- ΓöÇΓöÇ HISTORY CARD ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ -->
+  <div class="card">
+    <div class="history-header">
+      <div class="card-title">History</div>
+      <select id="range-select" onchange="updateHistoryView()">
+        <option value="5">Last 5 min</option>
+        <option value="60">Last 1 hour</option>
+        <option value="480">Last 8 hours</option>
+        <option value="1440">Last 24 hours</option>
+        <option value="0">All</option>
+      </select>
+    </div>
+
+    <canvas id="history-canvas" height="160"></canvas>
+
+    <div class="history-stats">
+      <div class="h-stat">
+        <div class="hs-label">Max RPM</div>
+        <div class="hs-val" id="hs-max">ΓÇö</div>
+      </div>
+      <div class="h-stat">
+        <div class="hs-label">Min (running)</div>
+        <div class="hs-val" id="hs-min">ΓÇö</div>
+      </div>
+      <div class="h-stat">
+        <div class="hs-label">Avg (running)</div>
+        <div class="hs-val" id="hs-avg">ΓÇö</div>
+      </div>
+      <div class="h-stat">
+        <div class="hs-label">Running time</div>
+        <div class="hs-val" id="hs-run">ΓÇö</div>
+      </div>
+      <div class="h-stat">
+        <div class="hs-label">Rest time</div>
+        <div class="hs-val" id="hs-rest">ΓÇö</div>
+      </div>
+      <div class="h-stat">
+        <div class="hs-label">Time on target</div>
+        <div class="hs-val" id="hs-ontgt">ΓÇö</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ΓöÇΓöÇ PERIODS TABLE CARD ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ -->
+  <div class="card">
+    <div class="card-title">Running and rest periods</div>
+    <div class="periods-wrap">
+      <table id="periods-table">
+        <thead>
+          <tr>
+            <th>State</th>
+            <th>From</th>
+            <th>To</th>
+            <th>Duration</th>
+            <th>Avg RPM</th>
+            <th>Max RPM</th>
+          </tr>
+        </thead>
+        <tbody id="periods-body">
+          <tr><td colspan="6" class="no-data">No periods recorded yet.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <footer>Tachometer Monitor &mdash; works offline &bull; data stored locally</footer>
+</div><!-- /#app -->
+
+
+<script>
+/* ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+   TACHOMETER MONITOR ΓÇö main script
+   ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+   Sections:
+     1. State & constants
+     2. LocalStorage helpers
+     3. ΓöÇΓöÇ PLUGGABLE DATA SOURCE ΓöÇΓöÇ  ΓåÉ put your ESP32 code here
+     4. Demo mode data generator
+     5. RPM processing (state, alert, history)
+     6. Gauge drawing (Canvas)
+     7. History chart drawing (Canvas)
+     8. Periods table rendering
+     9. Stats calculation
+    10. Settings
+    11. Export CSV
+    12. UI helpers (splash, modal, status pill)
+    13. Init
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ */
+
+/* ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+   1. STATE & CONSTANTS
+ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
+const MAX_HISTORY   = 86400;   // max data points kept (~24h at 1/sec)
+const SAMPLE_MS     = 1000;    // how often we sample RPM (ms)
+const GAUGE_RADIUS  = 120;     // gauge drawing radius (canvas units)
+
+// Application state
+const state = {
+  rpm:           0,       // current RPM
+  targetRPM:     null,    // null means "not set"
+  tolerance:     50,
+  idleThreshold: 30,
+  gaugeMax:      3000,
+
+  isRunning:      false,
+  wasRunning:     false,  // for edge-detection
+  connectionMode: 'none', // 'none' | 'device' | 'demo'
+  connectionStatus: 'disconnected', // 'disconnected'|'connecting'|'connected'|'demo'
+  deviceId:       '',
+
+  // displayed (animated) needle angle
+  displayRPM:    0,
+
+  // alert
+  alertActive:   false,
+  beepCooldown:  false,
+
+  // history: array of { t: timestamp_ms, rpm: number }
+  history: [],
+
+  // periods: array of { state:'running'|'rest', from, to, rpms:[] }
+  periods: [],
+  currentPeriod: null,
+
+  // demo generator internals
+  _demoInterval:  null,
+  _demoPhase:     'rest',  // 'running' | 'rest'
+  _demoPhaseMs:   0,
+  _demoPhaseDur:  0,
+  _demoBaseRPM:   0,
+
+  // connection / device interval
+  _connInterval: null,
+};
+
+/* ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+   2. LOCALSTORAGE HELPERS
+ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
+function saveToStorage() {
+  try {
+    localStorage.setItem('tach_history', JSON.stringify(state.history.slice(-MAX_HISTORY)));
+    localStorage.setItem('tach_periods', JSON.stringify(state.periods.slice(-500)));
+    localStorage.setItem('tach_settings', JSON.stringify({
+      targetRPM:     state.targetRPM,
+      tolerance:     state.tolerance,
+      idleThreshold: state.idleThreshold,
+      gaugeMax:      state.gaugeMax,
+    }));
+  } catch (e) {
+    console.warn('localStorage save failed:', e);
+  }
+}
+
+function loadFromStorage() {
+  try {
+    const h = localStorage.getItem('tach_history');
+    if (h) state.history = JSON.parse(h);
+
+    const p = localStorage.getItem('tach_periods');
+    if (p) state.periods = JSON.parse(p);
+
+    const s = localStorage.getItem('tach_settings');
+    if (s) {
+      const saved = JSON.parse(s);
+      state.targetRPM     = saved.targetRPM     ?? null;
+      state.tolerance     = saved.tolerance      ?? 50;
+      state.idleThreshold = saved.idleThreshold  ?? 30;
+      state.gaugeMax      = saved.gaugeMax       ?? 3000;
+    }
+  } catch (e) {
+    console.warn('localStorage load failed:', e);
+  }
+}
+
+/* ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+   3. ΓöÇΓöÇ PLUGGABLE DATA SOURCE ΓöÇΓöÇ
+   ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+   Replace the body of connectToDevice() with your own transport.
+
+   Examples:
+     A) WebSocket to ESP32:
+        const ws = new WebSocket(`ws://${endpoint}/ws`);
+        ws.onmessage = e => pushRPM(JSON.parse(e.data).rpm);
+        ws.onerror = () => disconnectCleanup();
+
+     B) HTTP polling from ESP32:
+        state._connInterval = setInterval(async () => {
+          const res = await fetch(`http://${endpoint}/rpm`);
+          const { rpm } = await res.json();
+          pushRPM(rpm);
+        }, SAMPLE_MS);
+
+     C) MQTT over WebSocket (e.g. with a MQTT.js CDN):
+        const client = mqtt.connect('ws://broker:9001');
+        client.subscribe('machine/rpm');
+        client.on('message', (t, msg) => pushRPM(+msg.toString()));
+
+   The function receives the user-supplied `deviceId` string.
+   Call `setStatus('connected')` once ready, or
+   call `disconnectCleanup()` on failure.
+ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
+function connectToDevice(deviceId) {
+  setStatus('connecting');
+
+  // ΓöÇΓöÇ TODO: replace this block with your real transport ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  // Example: WebSocket endpoint derived from deviceId
+  // const endpoint = `192.168.1.${deviceId}`;
+  // const ws = new WebSocket(`ws://${endpoint}/ws`);
+  // ws.onopen = () => setStatus('connected');
+  // ws.onmessage = e => pushRPM(JSON.parse(e.data).rpm);
+  // ws.onerror = ws.onclose = () => disconnectCleanup();
+  // ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+  // Placeholder: simulate a failed connection after 2 s
+  // (remove this when you add real code above)
+  setTimeout(() => {
+    console.info('No real data source configured. Reverting to Disconnected.');
+    disconnectCleanup();
+  }, 2000);
+}
+
+/* ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+   4. DEMO MODE DATA GENERATOR
+ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
+function startDemoGenerator() {
+  // Kick off a new phase
+  function newPhase() {
+    state._demoPhase    = state._demoPhase === 'rest' ? 'running' : 'rest';
+    state._demoPhaseMs  = 0;
+    state._demoBaseRPM  = state._demoPhase === 'running'
+      ? 600 + Math.random() * 1000   // running: 600ΓÇô1600
+      : 0;
+    // duration: running 10ΓÇô30 s, rest 5ΓÇô15 s
+    state._demoPhaseDur = state._demoPhase === 'running'
+      ? (10 + Math.random() * 20) * 1000
+      : (5  + Math.random() * 10) * 1000;
+  }
+
+  // Start in rest
+  state._demoPhase    = 'rest';
+  state._demoPhaseMs  = 0;
+  state._demoBaseRPM  = 0;
+  state._demoPhaseDur = 3000; // short initial rest
+
+  state._demoInterval = setInterval(() => {
+    state._demoPhaseMs += SAMPLE_MS;
+    if (state._demoPhaseMs >= state._demoPhaseDur) newPhase();
+
+    let rpm;
+    if (state._demoPhase === 'running') {
+      // slight noise ┬▒80
+      rpm = Math.max(0, state._demoBaseRPM + (Math.random() - 0.5) * 160);
+      // gradual ramp up/down near phase boundaries
+      const ramp = Math.min(state._demoPhaseMs / 2000, 1);
+      rpm *= ramp;
+    } else {
+      rpm = 0;
+    }
+    pushRPM(Math.round(rpm));
+  }, SAMPLE_MS);
+}
+
+function stopDemoGenerator() {
+  if (state._demoInterval) {
+    clearInterval(state._demoInterval);
+    state._demoInterval = null;
+  }
+}
+
+/* ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+   5. RPM PROCESSING
+ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
+/**
+ * Main entry point for new RPM data.
+ * Called by demo generator or real data source.
+ */
+function pushRPM(rpm) {
+  rpm = Math.max(0, Math.round(rpm));
+  state.rpm = rpm;
+
+  const now = Date.now();
+  const isRunning = rpm >= state.idleThreshold;
+  state.isRunning = isRunning;
+
+  // ΓöÇΓöÇ Record history point ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  state.history.push({ t: now, rpm });
+  // Trim to rolling max (keep storage lean)
+  if (state.history.length > MAX_HISTORY) {
+    state.history.splice(0, state.history.length - MAX_HISTORY);
+  }
+
+  // ΓöÇΓöÇ Period tracking ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  const periodState = isRunning ? 'running' : 'rest';
+  if (!state.currentPeriod) {
+    state.currentPeriod = { state: periodState, from: now, to: now, rpms: [rpm] };
+  } else if (state.currentPeriod.state !== periodState) {
+    // State changed: close current period
+    state.currentPeriod.to = now;
+    state.periods.unshift({ ...state.currentPeriod, rpms: [...state.currentPeriod.rpms] });
+    if (state.periods.length > 500) state.periods.pop();
+    // Open new period
+    state.currentPeriod = { state: periodState, from: now, to: now, rpms: [rpm] };
+  } else {
+    state.currentPeriod.to = now;
+    state.currentPeriod.rpms.push(rpm);
+  }
+
+  // ΓöÇΓöÇ Alert check ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  checkAlert(rpm, isRunning);
+
+  // ΓöÇΓöÇ Persist every ~10 samples ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  if (state.history.length % 10 === 0) saveToStorage();
+
+  // ΓöÇΓöÇ Update UI ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  updateLiveUI();
+  updateHistoryView();
+  renderPeriods();
+}
+
+function checkAlert(rpm, isRunning) {
+  if (!isRunning || state.targetRPM === null) {
+    hideAlert();
+    return;
+  }
+  const lo = state.targetRPM - state.tolerance;
+  const hi = state.targetRPM + state.tolerance;
+  if (rpm < lo || rpm > hi) {
+    showAlert(`RPM ${rpm} is outside target ${state.targetRPM} ┬▒ ${state.tolerance}`);
+  } else {
+    hideAlert();
+  }
+}
+
+/* ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+   6. GAUGE DRAWING (Canvas)
+ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
+const gaugeCanvas = document.getElementById('gauge-canvas');
+const gCtx = gaugeCanvas.getContext('2d');
+
+// Animate needle smoothly
+let rafId = null;
+function animateGauge() {
+  // Ease display RPM toward actual RPM
+  const diff = state.rpm - state.displayRPM;
+  state.displayRPM += diff * 0.12;
+  if (Math.abs(diff) < 0.5) state.displayRPM = state.rpm;
+
+  drawGauge(state.displayRPM);
+  rafId = requestAnimationFrame(animateGauge);
+}
+
+function drawGauge(rpm) {
+  const canvas = gaugeCanvas;
+  const W = canvas.offsetWidth;
+  // Keep canvas pixel size in sync with CSS size
+  if (canvas.width !== W * devicePixelRatio || canvas.height !== (W * 0.67) * devicePixelRatio) {
+    canvas.width  = W * devicePixelRatio;
+    canvas.height = (W * 0.67) * devicePixelRatio;
+    canvas.style.height = (W * 0.67) + 'px';
+  }
+  const dpr = devicePixelRatio;
+  const ctx = gCtx;
+  const cw = canvas.width, ch = canvas.height;
+  ctx.clearRect(0, 0, cw, ch);
+
+  const cx = cw / 2;
+  const cy = ch * 0.57; // center a bit below middle so arc looks natural
+  const R  = Math.min(cw, ch) * 0.42;
+
+  // Arc spans from 210┬░ to 330┬░ (210┬░ left, 330┬░ right, 240┬░ total sweep)
+  const startAngle = (210) * Math.PI / 180;
+  const endAngle   = (330) * Math.PI / 180;
+  const totalSweep = (330 - 210 + 360) % 360 * Math.PI / 180; // 240 degrees
+
+  // Clamp rpm to gaugeMax
+  const clampedRPM = Math.min(rpm, state.gaugeMax);
+  const fraction   = clampedRPM / state.gaugeMax;
+  const needleAngle = startAngle + fraction * totalSweep;
+
+  // ΓöÇΓöÇ Background track arc ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  ctx.beginPath();
+  ctx.arc(cx, cy, R, startAngle, endAngle);
+  ctx.strokeStyle = '#1e3054';
+  ctx.lineWidth   = R * 0.12;
+  ctx.lineCap     = 'round';
+  ctx.stroke();
+
+  // ΓöÇΓöÇ Filled arc (orange) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  if (fraction > 0.001) {
+    ctx.beginPath();
+    ctx.arc(cx, cy, R, startAngle, needleAngle);
+    ctx.strokeStyle = '#ff9f1a';
+    ctx.lineWidth   = R * 0.12;
+    ctx.lineCap     = 'round';
+    ctx.stroke();
+  }
+
+  // ΓöÇΓöÇ Tick marks ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  const tickCount = 7; // labels: 0, 500, 1000, ΓÇª up to gaugeMax
+  const tickStep  = state.gaugeMax / (tickCount - 1);
+
+  for (let i = 0; i < tickCount; i++) {
+    const frac  = i / (tickCount - 1);
+    const angle = startAngle + frac * totalSweep;
+    const isMajor = true; // all 7 are major
+
+    // Minor ticks between majors
+    if (i < tickCount - 1) {
+      for (let m = 1; m < 5; m++) {
+        const mFrac  = (i + m / 5) / (tickCount - 1);
+        const mAngle = startAngle + mFrac * totalSweep;
+        const innerR = R * 0.84;
+        const outerR = R * 0.92;
+        ctx.beginPath();
+        ctx.moveTo(cx + Math.cos(mAngle) * innerR, cy + Math.sin(mAngle) * innerR);
+        ctx.lineTo(cx + Math.cos(mAngle) * outerR, cy + Math.sin(mAngle) * outerR);
+        ctx.strokeStyle = '#1e3054';
+        ctx.lineWidth   = dpr;
+        ctx.stroke();
+      }
+    }
+
+    const innerR = R * 0.78;
+    const outerR = R * 0.94;
+    ctx.beginPath();
+    ctx.moveTo(cx + Math.cos(angle) * innerR, cy + Math.sin(angle) * innerR);
+    ctx.lineTo(cx + Math.cos(angle) * outerR, cy + Math.sin(angle) * outerR);
+    ctx.strokeStyle = '#2d4a7a';
+    ctx.lineWidth   = 1.5 * dpr;
+    ctx.stroke();
+
+    // Labels
+    const labelR = R * 0.63;
+    const lx = cx + Math.cos(angle) * labelR;
+    const ly = cy + Math.sin(angle) * labelR;
+    const labelVal = Math.round(tickStep * i);
+    ctx.fillStyle   = '#64748b';
+    ctx.font        = `${Math.max(9, R * 0.11)}px Inter, sans-serif`;
+    ctx.textAlign   = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(labelVal >= 1000 ? (labelVal/1000).toFixed(0)+'k' : String(labelVal), lx, ly);
+  }
+
+  // ΓöÇΓöÇ Needle ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  const needleLen  = R * 0.82;
+  const needleTail = R * 0.18;
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.rotate(needleAngle);
+  // Needle body
+  ctx.beginPath();
+  ctx.moveTo(-needleTail, 0);
+  ctx.lineTo(needleLen, 0);
+  ctx.strokeStyle = '#ff9f1a';
+  ctx.lineWidth   = 3 * dpr;
+  ctx.lineCap     = 'round';
+  ctx.stroke();
+  ctx.restore();
+
+  // Hub circle
+  ctx.beginPath();
+  ctx.arc(cx, cy, R * 0.07, 0, Math.PI * 2);
+  ctx.fillStyle = '#ff9f1a';
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(cx, cy, R * 0.035, 0, Math.PI * 2);
+  ctx.fillStyle = '#0b1220';
+  ctx.fill();
+
+  // ΓöÇΓöÇ Center RPM text ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  const displayVal = Math.round(rpm);
+  ctx.fillStyle    = '#e2e8f0';
+  ctx.font         = `bold ${R * 0.28}px Inter, sans-serif`;
+  ctx.textAlign    = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(displayVal.toLocaleString(), cx, cy + R * 0.3);
+
+  ctx.fillStyle    = '#64748b';
+  ctx.font         = `${R * 0.11}px Inter, sans-serif`;
+  ctx.fillText('RPM', cx, cy + R * 0.45);
+}
+
+/* ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+   7. HISTORY CHART (Canvas)
+ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
+const histCanvas = document.getElementById('history-canvas');
+const hCtx = histCanvas.getContext('2d');
+
+function getFilteredHistory() {
+  const rangeMin = parseInt(document.getElementById('range-select').value);
+  if (rangeMin === 0) return state.history; // "All"
+  const cutoff = Date.now() - rangeMin * 60 * 1000;
+  return state.history.filter(p => p.t >= cutoff);
+}
+
+function drawHistoryChart() {
+  const canvas = histCanvas;
+  const W = canvas.offsetWidth;
+  const H = 160;
+  const dpr = devicePixelRatio;
+
+  canvas.width  = W * dpr;
+  canvas.height = H * dpr;
+  canvas.style.height = H + 'px';
+
+  const ctx = hCtx;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  const data = getFilteredHistory();
+
+  // Background
+  ctx.fillStyle = '#0d1926';
+  ctx.roundRect(0, 0, canvas.width, canvas.height, 8 * dpr);
+  ctx.fill();
+
+  const pad = { t: 14 * dpr, r: 14 * dpr, b: 28 * dpr, l: 44 * dpr };
+  const cw = canvas.width  - pad.l - pad.r;
+  const ch = canvas.height - pad.t - pad.b;
+
+  if (data.length < 2) {
+    ctx.fillStyle = '#64748b';
+    ctx.font = `${12 * dpr}px Inter, sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('No data for selected range', canvas.width / 2, canvas.height / 2);
+    return;
+  }
+
+  const minT   = data[0].t;
+  const maxT   = data[data.length - 1].t;
+  const maxRPM = Math.max(state.gaugeMax, ...data.map(p => p.rpm));
+  const minRPM = 0;
+
+  const toX = t   => pad.l + ((t   - minT)   / (maxT - minT || 1)) * cw;
+  const toY = rpm => pad.t + ch - ((rpm - minRPM) / (maxRPM - minRPM || 1)) * ch;
+
+  // ΓöÇΓöÇ Grid lines ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  const gridSteps = 4;
+  ctx.setLineDash([3 * dpr, 4 * dpr]);
+  ctx.strokeStyle = '#1e3054';
+  ctx.lineWidth   = dpr;
+  for (let i = 0; i <= gridSteps; i++) {
+    const y = pad.t + (ch / gridSteps) * i;
+    ctx.beginPath();
+    ctx.moveTo(pad.l, y);
+    ctx.lineTo(pad.l + cw, y);
+    ctx.stroke();
+    // Y axis label
+    const val = Math.round(maxRPM - (maxRPM / gridSteps) * i);
+    ctx.fillStyle = '#64748b';
+    ctx.font = `${10 * dpr}px Inter, sans-serif`;
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(val >= 1000 ? (val/1000).toFixed(1)+'k' : val, pad.l - 4 * dpr, y);
+  }
+  ctx.setLineDash([]);
+
+  // ΓöÇΓöÇ Idle threshold line ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  const thY = toY(state.idleThreshold);
+  ctx.beginPath();
+  ctx.moveTo(pad.l, thY);
+  ctx.lineTo(pad.l + cw, thY);
+  ctx.strokeStyle = 'rgba(100,116,139,0.4)';
+  ctx.lineWidth   = dpr;
+  ctx.setLineDash([5 * dpr, 5 * dpr]);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Target RPM line
+  if (state.targetRPM !== null) {
+    const tgtY = toY(state.targetRPM);
+    ctx.beginPath();
+    ctx.moveTo(pad.l, tgtY);
+    ctx.lineTo(pad.l + cw, tgtY);
+    ctx.strokeStyle = 'rgba(255,159,26,0.35)';
+    ctx.lineWidth   = 1.5 * dpr;
+    ctx.setLineDash([6 * dpr, 4 * dpr]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  // ΓöÇΓöÇ Line + fill ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  ctx.beginPath();
+  ctx.moveTo(toX(data[0].t), toY(data[0].rpm));
+  for (let i = 1; i < data.length; i++) {
+    ctx.lineTo(toX(data[i].t), toY(data[i].rpm));
+  }
+  // Stroke
+  ctx.strokeStyle = '#ff9f1a';
+  ctx.lineWidth   = 2 * dpr;
+  ctx.lineJoin    = 'round';
+  ctx.stroke();
+
+  // Fill gradient
+  const lastX = toX(data[data.length - 1].t);
+  ctx.lineTo(lastX, pad.t + ch);
+  ctx.lineTo(pad.l, pad.t + ch);
+  ctx.closePath();
+  const grad = ctx.createLinearGradient(0, pad.t, 0, pad.t + ch);
+  grad.addColorStop(0,   'rgba(255,159,26,0.25)');
+  grad.addColorStop(1,   'rgba(255,159,26,0)');
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  // ΓöÇΓöÇ X-axis time labels ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  const xLabels = 4;
+  ctx.fillStyle   = '#64748b';
+  ctx.font        = `${10 * dpr}px Inter, sans-serif`;
+  ctx.textAlign   = 'center';
+  ctx.textBaseline = 'top';
+  for (let i = 0; i <= xLabels; i++) {
+    const t  = minT + (maxT - minT) * (i / xLabels);
+    const x  = toX(t);
+    const d  = new Date(t);
+    const label = d.getHours().toString().padStart(2,'0') + ':' +
+                  d.getMinutes().toString().padStart(2,'0') + ':' +
+                  d.getSeconds().toString().padStart(2,'0');
+    ctx.fillText(label, x, pad.t + ch + 4 * dpr);
+  }
+}
+
+/* ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+   8. PERIODS TABLE
+ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
+function renderPeriods() {
+  const tbody = document.getElementById('periods-body');
+  // Combine saved periods + current open period
+  let all = [...state.periods];
+  if (state.currentPeriod) all.unshift({ ...state.currentPeriod });
+
+  if (all.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" class="no-data">No periods recorded yet.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = all.map(p => {
+    const dur    = p.to - p.from;
+    const avgRPM = p.rpms.length ? Math.round(p.rpms.reduce((a,b)=>a+b,0) / p.rpms.length) : 0;
+    const maxRPM = p.rpms.length ? Math.max(...p.rpms) : 0;
+    const isRunning = p.state === 'running';
+    return `
+      <tr>
+        <td><span class="state-badge ${p.state}">${isRunning ? 'Running' : 'Rest'}</span></td>
+        <td>${formatDate(p.from)}</td>
+        <td>${formatDate(p.to)}</td>
+        <td>${formatDuration(dur)}</td>
+        <td>${isRunning ? avgRPM : 'ΓÇö'}</td>
+        <td>${isRunning ? maxRPM : 'ΓÇö'}</td>
+      </tr>`;
+  }).join('');
+}
+
+/* ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+   9. STATS CALCULATION
+ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
+function calcStats(data) {
+  if (!data.length) return null;
+
+  const allRPM     = data.map(p => p.rpm);
+  const runningPts = data.filter(p => p.rpm >= state.idleThreshold);
+  const restPts    = data.filter(p => p.rpm < state.idleThreshold);
+
+  const maxRPM = Math.max(...allRPM);
+  const minRun = runningPts.length ? Math.min(...runningPts.map(p=>p.rpm)) : null;
+  const avgRun = runningPts.length
+    ? Math.round(runningPts.reduce((a,p)=>a+p.rpm,0) / runningPts.length)
+    : null;
+
+  // Running / rest time: count samples (each ~1 s)
+  const runSec  = runningPts.length;
+  const restSec = restPts.length;
+
+  // Time on target
+  let onTarget = null;
+  if (state.targetRPM !== null) {
+    const lo = state.targetRPM - state.tolerance;
+    const hi = state.targetRPM + state.tolerance;
+    const tgtPts = runningPts.filter(p => p.rpm >= lo && p.rpm <= hi);
+    onTarget = tgtPts.length;
+  }
+
+  return { maxRPM, minRun, avgRun, runSec, restSec, onTarget };
+}
+
+function updateStats() {
+  const data  = getFilteredHistory();
+  const stats = calcStats(data);
+
+  const set = (id, val) => { document.getElementById(id).textContent = val; };
+
+  if (!stats) {
+    ['hs-max','hs-min','hs-avg','hs-run','hs-rest','hs-ontgt']
+      .forEach(id => set(id, 'ΓÇö'));
+    return;
+  }
+
+  set('hs-max',   stats.maxRPM !== undefined ? stats.maxRPM : 'ΓÇö');
+  set('hs-min',   stats.minRun !== null ? stats.minRun : 'ΓÇö');
+  set('hs-avg',   stats.avgRun !== null ? stats.avgRun : 'ΓÇö');
+  set('hs-run',   formatDuration(stats.runSec * 1000));
+  set('hs-rest',  formatDuration(stats.restSec * 1000));
+  if (state.targetRPM === null) {
+    set('hs-ontgt', 'set a target');
+  } else {
+    set('hs-ontgt', stats.onTarget !== null ? formatDuration(stats.onTarget * 1000) : 'ΓÇö');
+  }
+}
+
+/* ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+   10. SETTINGS
+ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
+function loadSettingsToUI() {
+  const set = (id, val) => {
+    if (val !== null && val !== undefined)
+      document.getElementById(id).value = val;
+  };
+  set('set-target', state.targetRPM ?? '');
+  set('set-tol',    state.tolerance);
+  set('set-idle',   state.idleThreshold);
+  set('set-gmax',   state.gaugeMax);
+}
+
+function saveSettings() {
+  const target = document.getElementById('set-target').value;
+  state.targetRPM     = target !== '' ? parseFloat(target) : null;
+  state.tolerance     = parseFloat(document.getElementById('set-tol').value)  || 50;
+  state.idleThreshold = parseFloat(document.getElementById('set-idle').value) || 30;
+  state.gaugeMax      = parseFloat(document.getElementById('set-gmax').value) || 3000;
+  saveToStorage();
+  showToast('Settings saved Γ£ô');
+}
+
+/* ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+   11. EXPORT CSV
+ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
+function exportCSV() {
+  if (!state.history.length) { showToast('No data to export.'); return; }
+  const rows = [['Timestamp','RPM','State']];
+  state.history.forEach(p => {
+    const iso   = new Date(p.t).toISOString();
+    const s     = p.rpm >= state.idleThreshold ? 'Running' : 'Idle';
+    rows.push([iso, p.rpm, s]);
+  });
+  const csv  = rows.map(r => r.join(',')).join('\r\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = `tachometer_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+/* ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+   12. UI HELPERS
+ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
+
+// ΓöÇΓöÇ Status pill ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+function setStatus(mode) {
+  state.connectionStatus = mode;
+  const pill = document.getElementById('status-pill');
+  const text = document.getElementById('status-text');
+  pill.className = 'status-pill';
+  const labels = {
+    disconnected: 'Disconnected',
+    connecting:   'Connecting...',
+    connected:    'Connected',
+    demo:         'Demo mode',
+  };
+  text.textContent = labels[mode] || mode;
+  if (mode === 'connected' || mode === 'demo') pill.classList.add(mode === 'demo' ? 'demo' : 'connected');
+  if (mode === 'connecting') pill.classList.add('connecting');
+}
+
+// ΓöÇΓöÇ Alert banner ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+function showAlert(msg) {
+  const banner = document.getElementById('alert-banner');
+  document.getElementById('alert-msg').textContent = msg;
+  if (!state.alertActive) {
+    state.alertActive = true;
+    banner.classList.add('visible');
+    beep();
+  }
+}
+function hideAlert() {
+  if (state.alertActive) {
+    state.alertActive = false;
+    document.getElementById('alert-banner').classList.remove('visible');
+  }
+}
+
+// ΓöÇΓöÇ Web Audio beep ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+let audioCtx = null;
+function beep() {
+  if (state.beepCooldown) return;
+  state.beepCooldown = true;
+  setTimeout(() => { state.beepCooldown = false; }, 3000);
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc  = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.frequency.value = 880;
+    osc.type            = 'square';
+    gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.4);
+  } catch(e) { /* Audio not available */ }
+}
+
+// ΓöÇΓöÇ Toast notification ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+let toastTimeout;
+function showToast(msg) {
+  // Re-use alert banner for toast (styled differently via JS)
+  const el = document.createElement('div');
+  el.style.cssText = `
+    position:fixed; bottom:24px; left:50%; transform:translateX(-50%);
+    background:#16253d; border:1px solid #ff9f1a; color:#ff9f1a;
+    padding:9px 18px; border-radius:8px; font-size:.83rem; font-weight:600;
+    z-index:800; box-shadow:0 4px 20px rgba(0,0,0,.4);
+    transition:opacity .4s;
+  `;
+  el.textContent = msg;
+  document.body.appendChild(el);
+  clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => {
+    el.style.opacity = '0';
+    setTimeout(() => el.remove(), 400);
+  }, 2000);
+}
+
+// ΓöÇΓöÇ Modal ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+function openModal()  { document.getElementById('modal-overlay').classList.add('visible'); }
+function closeModal() { document.getElementById('modal-overlay').classList.remove('visible'); }
+function confirmClear() {
+  state.history        = [];
+  state.periods        = [];
+  state.currentPeriod  = null;
+  saveToStorage();
+  closeModal();
+  updateHistoryView();
+  renderPeriods();
+  showToast('History cleared.');
+}
+
+// ΓöÇΓöÇ Connect / disconnect ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+function connectDevice() {
+  const id = document.getElementById('device-id').value.trim();
+  if (!id) { showToast('Enter a Device ID first.'); return; }
+  disconnectCleanup();
+  state.connectionMode = 'device';
+  state.deviceId       = id;
+  connectToDevice(id);
+}
+
+function startDemo() {
+  disconnectCleanup();
+  state.connectionMode = 'demo';
+  setStatus('demo');
+  startDemoGenerator();
+}
+
+function disconnectCleanup() {
+  stopDemoGenerator();
+  if (state._connInterval) { clearInterval(state._connInterval); state._connInterval = null; }
+  state.connectionMode = 'none';
+  hideAlert();
+  setStatus('disconnected');
+}
+
+// ΓöÇΓöÇ Live UI update ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+function updateLiveUI() {
+  // Tile: current RPM
+  document.getElementById('tile-rpm').textContent = state.rpm.toLocaleString();
+
+  // Tile: machine state
+  const stateEl = document.getElementById('tile-state');
+  if (state.isRunning) {
+    stateEl.textContent  = 'Running';
+    stateEl.className    = 'tile-value running';
+  } else {
+    stateEl.textContent  = 'Idle';
+    stateEl.className    = 'tile-value idle';
+  }
+}
+
+// ΓöÇΓöÇ History view (chart + stats) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+function updateHistoryView() {
+  drawHistoryChart();
+  updateStats();
+}
+
+// ΓöÇΓöÇ Splash screen ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+function hideSplash() {
+  document.getElementById('splash').classList.add('hidden');
+}
+
+// ΓöÇΓöÇ Format helpers ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+/**
+ * Format a timestamp like "3 Oct, 11:21:36"
+ */
+function formatDate(ts) {
+  const d   = new Date(ts);
+  const day = d.getDate();
+  const mon = d.toLocaleString('en', { month: 'short' });
+  const hms = d.toTimeString().slice(0, 8);
+  return `${day} ${mon}, ${hms}`;
+}
+
+/**
+ * Format milliseconds as "14s", "1m 2s", "1h 3m"
+ */
+function formatDuration(ms) {
+  const s = Math.round(ms / 1000);
+  if (s < 60)   return `${s}s`;
+  const m = Math.floor(s / 60);
+  const r = s % 60;
+  if (m < 60)   return r ? `${m}m ${r}s` : `${m}m`;
+  const h = Math.floor(m / 60);
+  const rm = m % 60;
+  return rm ? `${h}h ${rm}m` : `${h}h`;
+}
+
+/* ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+   13. INIT
+ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
+function init() {
+  // Load persisted data
+  loadFromStorage();
+  loadSettingsToUI();
+
+  // Splash ΓåÆ main (2 s delay)
+  setTimeout(hideSplash, 2000);
+
+  // Start gauge animation loop
+  animateGauge();
+
+  // Initial renders
+  updateHistoryView();
+  renderPeriods();
+  updateLiveUI();
+
+  // Redraw history chart on resize
+  window.addEventListener('resize', () => {
+    drawHistoryChart();
+    // gauge redraws on next RAF frame automatically
+  });
+}
+
+init();
+</script>
+</body>
+</html>
