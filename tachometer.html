@@ -6,182 +6,122 @@
   <title>Tachometer Monitor</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <style>
-    /* ── RESET & TOKENS ── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --bg:         #0b1220;
-      --surface:    #111d33;
-      --surface2:   #16253d;
-      --border:     #1e3054;
-      --accent:     #ff9f1a;
-      --green:      #22c55e;
-      --red:        #ef4444;
-      --text:       #e2e8f0;
-      --muted:      #64748b;
-      --dim:        #94a3b8;
-      --font:       'Inter', sans-serif;
-      --r:          14px;
-      --rs:         8px;
+      --bg:#0b1220; --surface:#111d33; --surface2:#16253d; --border:#1e3054;
+      --accent:#ff9f1a; --green:#22c55e; --red:#ef4444;
+      --text:#e2e8f0; --muted:#64748b; --dim:#94a3b8;
+      --font:'Inter',sans-serif; --r:14px; --rs:8px;
     }
-    html, body { background: var(--bg); color: var(--text); font-family: var(--font); min-height: 100dvh; overflow-x: hidden; }
+    html,body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100dvh;overflow-x:hidden}
 
-    /* ── SPLASH ── */
-    #splash {
-      position: fixed; inset: 0; background: var(--bg);
-      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px;
-      z-index: 1000; transition: opacity .7s, visibility .7s;
-    }
-    #splash.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
-    .sp-logo {
-      width: 96px; height: 96px; border-radius: 50%; border: 3px solid var(--accent);
-      display: flex; align-items: center; justify-content: center;
-      animation: pulse 1.5s ease-in-out infinite;
-    }
-    .sp-logo svg { width: 56px; height: 56px; }
-    @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(255,159,26,.4)} 50%{box-shadow:0 0 0 16px rgba(255,159,26,0)} }
-    .sp-title { font-size: 1.4rem; font-weight: 700; letter-spacing: .12em; }
-    .sp-sub { color: var(--muted); font-size: .9rem; }
-    .sp-dots span {
-      display: inline-block; width: 6px; height: 6px; border-radius: 50%;
-      background: var(--accent); margin: 0 3px; animation: db 1.2s ease-in-out infinite;
-    }
-    .sp-dots span:nth-child(2){animation-delay:.2s} .sp-dots span:nth-child(3){animation-delay:.4s}
-    @keyframes db { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-8px)} }
+    /* SPLASH */
+    #splash{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;z-index:1000;transition:opacity .7s,visibility .7s}
+    #splash.hidden{opacity:0;visibility:hidden;pointer-events:none}
+    .sp-logo{width:96px;height:96px;border-radius:50%;border:3px solid var(--accent);display:flex;align-items:center;justify-content:center;animation:pulse 1.5s ease-in-out infinite}
+    .sp-logo svg{width:56px;height:56px}
+    @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,159,26,.4)}50%{box-shadow:0 0 0 16px rgba(255,159,26,0)}}
+    .sp-title{font-size:1.4rem;font-weight:700;letter-spacing:.12em}
+    .sp-sub{color:var(--muted);font-size:.9rem}
+    .sp-dots span{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--accent);margin:0 3px;animation:db 1.2s ease-in-out infinite}
+    .sp-dots span:nth-child(2){animation-delay:.2s}.sp-dots span:nth-child(3){animation-delay:.4s}
+    @keyframes db{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-8px)}}
 
-    /* ── LAYOUT ── */
-    #app { max-width: 900px; margin: 0 auto; padding: 16px; display: flex; flex-direction: column; gap: 16px; }
+    /* LAYOUT */
+    #app{max-width:900px;margin:0 auto;padding:16px;display:flex;flex-direction:column;gap:16px}
 
-    /* ── HEADER ── */
-    .app-title {
-      font-size: 1.1rem; font-weight: 700; letter-spacing: .08em;
-      display: flex; align-items: center; gap: 8px; margin-bottom: 12px;
-    }
-    .app-title .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); animation: blink 2s ease infinite; }
-    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.2} }
+    /* HEADER */
+    .app-title{font-size:1.1rem;font-weight:700;letter-spacing:.08em;display:flex;align-items:center;gap:8px;margin-bottom:12px}
+    .app-title .dot{width:8px;height:8px;border-radius:50%;background:var(--accent);animation:blink 2s ease infinite}
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
 
-    /* connection row */
-    .conn-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 10px; }
-    .conn-row input {
-      flex: 1; min-width: 150px; padding: 9px 12px;
-      background: var(--surface); border: 1px solid var(--border); border-radius: var(--rs);
-      color: var(--text); font-family: var(--font); font-size: .9rem; outline: none;
-      transition: border-color .2s;
-    }
-    .conn-row input:focus { border-color: var(--accent); }
-    .conn-row select {
-      padding: 9px 10px; background: var(--surface2); border: 1px solid var(--border);
-      border-radius: var(--rs); color: var(--accent); font-family: var(--font);
-      font-size: .82rem; font-weight: 600; outline: none; cursor: pointer;
-    }
+    .conn-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
+    .conn-row input{flex:1;min-width:150px;padding:9px 12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--rs);color:var(--text);font-family:var(--font);font-size:.9rem;outline:none;transition:border-color .2s}
+    .conn-row input:focus{border-color:var(--accent)}
+    .conn-row select{padding:9px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);color:var(--accent);font-family:var(--font);font-size:.82rem;font-weight:600;outline:none;cursor:pointer}
 
-    /* ESP32 endpoint info */
-    .esp-info {
-      background: var(--surface2); border: 1px solid var(--border);
-      border-radius: var(--rs); padding: 10px 14px;
-      font-size: .78rem; color: var(--dim); line-height: 1.6;
-      margin-bottom: 4px;
-    }
-    .esp-info b { color: var(--accent); }
+    /* Info box */
+    .info-box{background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);padding:12px 14px;font-size:.78rem;color:var(--dim);line-height:1.7;margin-bottom:4px}
+    .info-box b{color:var(--accent)} .info-box code{background:#0b1220;padding:1px 5px;border-radius:4px;font-size:.76rem}
 
-    /* status row */
-    .status-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-    .pill {
-      display: inline-flex; align-items: center; gap: 6px;
-      padding: 4px 12px; border-radius: 999px;
-      font-size: .76rem; font-weight: 600; letter-spacing: .04em;
-      border: 1.5px solid var(--border); color: var(--muted); transition: all .3s;
-    }
-    .pill .pdot { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); transition: background .3s; }
-    .pill.connected,.pill.demo { border-color: var(--green); color: var(--green); }
-    .pill.connected .pdot,.pill.demo .pdot { background: var(--green); animation: blink 1.5s ease infinite; }
-    .pill.connecting { border-color: var(--accent); color: var(--accent); }
-    .pill.connecting .pdot { background: var(--accent); animation: blink .8s ease infinite; }
+    /* Status pill */
+    .status-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+    .pill{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:999px;font-size:.76rem;font-weight:600;letter-spacing:.04em;border:1.5px solid var(--border);color:var(--muted);transition:all .3s}
+    .pill .pdot{width:7px;height:7px;border-radius:50%;background:var(--muted);transition:background .3s}
+    .pill.connected,.pill.demo{border-color:var(--green);color:var(--green)}
+    .pill.connected .pdot,.pill.demo .pdot{background:var(--green);animation:blink 1.5s ease infinite}
+    .pill.connecting{border-color:var(--accent);color:var(--accent)}
+    .pill.connecting .pdot{background:var(--accent);animation:blink .8s ease infinite}
+    .pill.stale{border-color:var(--red);color:var(--red)}
+    .pill.stale .pdot{background:var(--red)}
 
-    /* ── BUTTONS ── */
-    .btn {
-      padding: 9px 18px; border: none; border-radius: var(--rs);
-      font-family: var(--font); font-size: .88rem; font-weight: 600;
-      cursor: pointer; transition: background .2s, transform .1s; letter-spacing: .03em;
-    }
-    .btn:active { transform: scale(.96); }
-    .btn-accent { background: var(--accent); color: #000; }
-    .btn-accent:hover { background: #ffb84d; }
-    .btn-outline { background: transparent; color: var(--accent); border: 1.5px solid var(--accent); }
-    .btn-outline:hover { background: rgba(255,159,26,.08); }
-    .btn-ghost { background: var(--surface2); color: var(--dim); border: 1px solid var(--border); }
-    .btn-ghost:hover { background: var(--border); }
-    .btn-danger { background: transparent; color: var(--red); border: 1.5px solid var(--red); }
-    .btn-danger:hover { background: rgba(239,68,68,.1); }
+    /* BUTTONS */
+    .btn{padding:9px 18px;border:none;border-radius:var(--rs);font-family:var(--font);font-size:.88rem;font-weight:600;cursor:pointer;transition:background .2s,transform .1s;letter-spacing:.03em}
+    .btn:active{transform:scale(.96)}
+    .btn-accent{background:var(--accent);color:#000}.btn-accent:hover{background:#ffb84d}
+    .btn-outline{background:transparent;color:var(--accent);border:1.5px solid var(--accent)}.btn-outline:hover{background:rgba(255,159,26,.08)}
+    .btn-ghost{background:var(--surface2);color:var(--dim);border:1px solid var(--border)}.btn-ghost:hover{background:var(--border)}
+    .btn-danger{background:transparent;color:var(--red);border:1.5px solid var(--red)}.btn-danger:hover{background:rgba(239,68,68,.1)}
 
-    /* ── ALERT ── */
-    #alert-banner {
-      display: none; background: rgba(239,68,68,.12); border: 1.5px solid var(--red);
-      border-radius: var(--rs); padding: 10px 16px; color: var(--red);
-      font-size: .88rem; font-weight: 600; align-items: center; gap: 8px;
-      animation: shake .4s ease;
-    }
-    #alert-banner.visible { display: flex; }
-    @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-4px)} 75%{transform:translateX(4px)} }
+    /* ALERT */
+    #alert-banner{display:none;background:rgba(239,68,68,.12);border:1.5px solid var(--red);border-radius:var(--rs);padding:10px 16px;color:var(--red);font-size:.88rem;font-weight:600;align-items:center;gap:8px;animation:shake .4s ease}
+    #alert-banner.visible{display:flex}
+    @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
 
-    /* ── CARDS ── */
-    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 20px; }
-    .card-title { font-size: .78rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 16px; }
+    /* CARDS */
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px}
+    .card-title{font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:16px}
 
-    /* ── GAUGE ── */
-    .gauge-wrap { display: flex; justify-content: center; margin-bottom: 16px; }
-    #gauge-canvas { max-width: 300px; width: 100%; height: auto; }
-    .stat-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .stat-tile { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--rs); padding: 12px 14px; }
-    .tile-label { font-size: .72rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
-    .tile-value { font-size: 1.3rem; font-weight: 700; color: var(--text); }
-    .tile-value.running { color: var(--accent); }
-    .tile-value.idle    { color: var(--muted); }
+    /* GAUGE */
+    .gauge-wrap{display:flex;justify-content:center;margin-bottom:16px}
+    #gauge-canvas{max-width:300px;width:100%;height:auto}
+    .stat-tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .stat-tile{background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);padding:12px 14px}
+    .tile-label{font-size:.72rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+    .tile-value{font-size:1.3rem;font-weight:700;color:var(--text)}
+    .tile-value.running{color:var(--accent)}.tile-value.idle{color:var(--muted)}
 
-    /* ── SETTINGS ── */
-    .sg { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
-    @media(max-width:480px){ .sg{grid-template-columns:1fr} }
-    .field { display: flex; flex-direction: column; gap: 5px; }
-    .field label { font-size: .75rem; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
-    .field input[type="number"] {
-      padding: 9px 12px; background: var(--surface2); border: 1px solid var(--border);
-      border-radius: var(--rs); color: var(--text); font-family: var(--font); font-size: .9rem; outline: none;
-      transition: border-color .2s;
-    }
-    .field input[type="number"]:focus { border-color: var(--accent); }
-    .sh { font-size: .78rem; color: var(--muted); margin-bottom: 14px; line-height: 1.5; }
-    .sbtns { display: flex; flex-wrap: wrap; gap: 8px; }
+    /* SETTINGS */
+    .sg{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+    @media(max-width:480px){.sg{grid-template-columns:1fr}}
+    .field{display:flex;flex-direction:column;gap:5px}
+    .field label{font-size:.75rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+    .field input[type="number"]{padding:9px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);color:var(--text);font-family:var(--font);font-size:.9rem;outline:none;transition:border-color .2s}
+    .field input[type="number"]:focus{border-color:var(--accent)}
+    .sh{font-size:.78rem;color:var(--muted);margin-bottom:14px;line-height:1.5}
+    .sbtns{display:flex;flex-wrap:wrap;gap:8px}
 
-    /* ── HISTORY ── */
-    .hist-hdr { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
-    .hist-hdr .card-title { margin-bottom: 0; }
-    select { padding: 7px 10px; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--rs); color: var(--text); font-family: var(--font); font-size: .82rem; outline: none; cursor: pointer; }
-    #history-canvas { width: 100%; border-radius: var(--rs); display: block; }
-    .hs-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-top: 14px; }
-    @media(max-width:480px){ .hs-grid{grid-template-columns:repeat(2,1fr)} }
-    .hs { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--rs); padding: 10px 12px; text-align: center; }
-    .hs-l { font-size: .68rem; font-weight: 600; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); }
-    .hs-v { font-size: 1rem; font-weight: 700; color: var(--text); margin-top: 3px; white-space: nowrap; }
+    /* HISTORY */
+    .hist-hdr{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+    .hist-hdr .card-title{margin-bottom:0}
+    select{padding:7px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);color:var(--text);font-family:var(--font);font-size:.82rem;outline:none;cursor:pointer}
+    #history-canvas{width:100%;border-radius:var(--rs);display:block}
+    .hs-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
+    @media(max-width:480px){.hs-grid{grid-template-columns:repeat(2,1fr)}}
+    .hs{background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);padding:10px 12px;text-align:center}
+    .hs-l{font-size:.68rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+    .hs-v{font-size:1rem;font-weight:700;color:var(--text);margin-top:3px;white-space:nowrap}
 
-    /* ── TABLE ── */
-    .periods-wrap { overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; font-size: .82rem; white-space: nowrap; }
-    thead th { padding: 8px 10px; text-align: left; font-size: .7rem; font-weight: 600; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--border); }
-    tbody tr:nth-child(odd) { background: rgba(255,255,255,.015); }
-    tbody td { padding: 7px 10px; color: var(--dim); }
-    .badge { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: .72rem; font-weight: 700; }
-    .badge.running { color: var(--accent); border: 1px solid var(--accent); }
-    .badge.rest    { color: var(--muted);  border: 1px solid var(--border); }
-    .no-data { text-align: center; padding: 24px; color: var(--muted); font-size: .85rem; }
+    /* TABLE */
+    .periods-wrap{overflow-x:auto}
+    table{width:100%;border-collapse:collapse;font-size:.82rem;white-space:nowrap}
+    thead th{padding:8px 10px;text-align:left;font-size:.7rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border)}
+    tbody tr:nth-child(odd){background:rgba(255,255,255,.015)}
+    tbody td{padding:7px 10px;color:var(--dim)}
+    .badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:.72rem;font-weight:700}
+    .badge.running{color:var(--accent);border:1px solid var(--accent)}
+    .badge.rest{color:var(--muted);border:1px solid var(--border)}
+    .no-data{text-align:center;padding:24px;color:var(--muted);font-size:.85rem}
 
-    /* ── MODAL ── */
-    #modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.65); z-index: 900; align-items: center; justify-content: center; }
-    #modal-overlay.visible { display: flex; }
-    .modal { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 28px; max-width: 340px; width: 90%; }
-    .modal h3 { font-size: 1rem; margin-bottom: 10px; }
-    .modal p  { font-size: .85rem; color: var(--muted); margin-bottom: 20px; line-height: 1.5; }
-    .modal-btns { display: flex; gap: 10px; justify-content: flex-end; }
+    /* MODAL */
+    #modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:900;align-items:center;justify-content:center}
+    #modal-overlay.visible{display:flex}
+    .modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:28px;max-width:340px;width:90%}
+    .modal h3{font-size:1rem;margin-bottom:10px}
+    .modal p{font-size:.85rem;color:var(--muted);margin-bottom:20px;line-height:1.5}
+    .modal-btns{display:flex;gap:10px;justify-content:flex-end}
 
-    footer { text-align: center; font-size: .72rem; color: var(--muted); padding: 8px 0 20px; }
+    footer{text-align:center;font-size:.72rem;color:var(--muted);padding:8px 0 20px}
   </style>
 </head>
 <body>
@@ -189,7 +129,7 @@
 <!-- SPLASH -->
 <div id="splash">
   <div class="sp-logo">
-    <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg viewBox="0 0 60 60" fill="none">
       <circle cx="30" cy="30" r="26" stroke="#ff9f1a" stroke-width="2.5" stroke-dasharray="4 3"/>
       <path d="M15 42 A18 18 0 0 1 45 42" stroke="#ff9f1a" stroke-width="2.5" stroke-linecap="round" fill="none"/>
       <line x1="30" y1="30" x2="42" y2="20" stroke="#ff9f1a" stroke-width="2.5" stroke-linecap="round"/>
@@ -205,7 +145,7 @@
 <div id="modal-overlay">
   <div class="modal">
     <h3>Clear History</h3>
-    <p>This will permanently delete all RPM history, running/rest period records, and reset stats. This cannot be undone.</p>
+    <p>This will permanently delete all RPM history and period records. Cannot be undone.</p>
     <div class="modal-btns">
       <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
       <button class="btn btn-danger" onclick="confirmClear()">Clear</button>
@@ -220,26 +160,27 @@
   <header>
     <div class="app-title"><div class="dot"></div>TACHOMETER MONITOR</div>
 
-    <!-- ESP32 IP + Protocol + Connect -->
     <div class="conn-row">
-      <input type="text" id="device-id" placeholder="ESP32 IP  e.g. 192.168.1.100" maxlength="40" />
-      <select id="proto-select">
-        <option value="ws">WebSocket</option>
-        <option value="http">HTTP Poll</option>
+      <input type="text" id="device-id" placeholder="ESP32 IP  e.g. 192.168.1.100" maxlength="60" />
+      <select id="proto-select" onchange="onProtoChange()">
+        <option value="vercel">Vercel Backend ☁</option>
+        <option value="ws">WebSocket (Local)</option>
+        <option value="http">HTTP Poll (Local)</option>
       </select>
-      <button class="btn btn-accent"   onclick="connectDevice()">Connect</button>
-      <button class="btn btn-outline"  onclick="startDemo()">Demo</button>
-      <button class="btn btn-ghost" id="disc-btn" onclick="disconnectCleanup()" style="display:none">Disconnect</button>
+      <button class="btn btn-accent"  onclick="connectDevice()">Connect</button>
+      <button class="btn btn-outline" onclick="startDemo()">Demo</button>
+      <button class="btn btn-ghost"   id="disc-btn" onclick="disconnectCleanup()" style="display:none">Disconnect</button>
     </div>
 
-    <!-- ESP32 endpoint hint -->
-    <div class="esp-info" id="esp-hint">
-      <b>WebSocket:</b> ESP32 sends <code>{"rpm":1234}</code> to <code>ws://&lt;IP&gt;/ws</code> &nbsp;|&nbsp;
-      <b>HTTP Poll:</b> ESP32 responds to <code>GET http://&lt;IP&gt;/rpm</code> → <code>{"rpm":1234}</code>
+    <!-- Dynamic help box -->
+    <div class="info-box" id="info-box">
+      <b>☁ Vercel Backend mode:</b> Leave IP empty — ESP32 POSTs to <code>/api/rpm</code> on this same server.<br>
+      ESP32 Arduino: <code>http.begin("https://YOUR-VERCEL-URL/api/rpm");</code> <code>http.POST("{\"rpm\":"+String(rpm)+"}");</code>
     </div>
 
     <div class="status-row">
       <div class="pill" id="status-pill"><div class="pdot"></div><span id="status-text">Disconnected</span></div>
+      <span id="stale-badge" style="display:none;font-size:.75rem;color:var(--red)">⚠ ESP32 offline</span>
     </div>
 
     <div id="alert-banner"><span>⚠</span><span id="alert-msg">RPM out of target range!</span></div>
@@ -266,9 +207,9 @@
     </div>
     <p class="sh">An alert shows and beeps when RPM leaves target ± tolerance while the machine is running.</p>
     <div class="sbtns">
-      <button class="btn btn-accent"  onclick="saveSettings()">Save settings</button>
-      <button class="btn btn-ghost"   onclick="exportCSV()">Export CSV</button>
-      <button class="btn btn-danger"  onclick="openModal()">Clear history</button>
+      <button class="btn btn-accent" onclick="saveSettings()">Save settings</button>
+      <button class="btn btn-ghost"  onclick="exportCSV()">Export CSV</button>
+      <button class="btn btn-danger" onclick="openModal()">Clear history</button>
     </div>
   </div>
 
@@ -310,586 +251,393 @@
 </div>
 
 <script>
-/* ═══════════════════════════════════════════════════════
-   TACHOMETER MONITOR — main script
-   ─────────────────────────────────────────────────────
-   1. State & constants
-   2. LocalStorage
-   3. ESP32 Data Source  ← WebSocket & HTTP Poll
-   4. Demo generator
-   5. RPM processing
-   6. Gauge canvas
-   7. History chart canvas
-   8. Periods table
-   9. Stats
-  10. Settings
-  11. Export CSV
-  12. UI helpers
-  13. Init
-═══════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════
+   TACHOMETER MONITOR  —  Full Frontend + Vercel Backend
+   ───────────────────────────────────────────────────
+   Connection modes:
+     ☁  Vercel Backend  → polls /api/rpm (works everywhere, HTTPS safe)
+     🔌 WebSocket       → ws://IP/ws   (local network only)
+     🌐 HTTP Poll       → http://IP/rpm (local network only)
+═══════════════════════════════════════════════════ */
 
-/* ── 1. STATE ── */
 const MAX_HIST  = 86400;
 const SAMPLE_MS = 1000;
 
 const S = {
-  rpm: 0, displayRPM: 0,
-  targetRPM: null, tolerance: 50, idleThreshold: 30, gaugeMax: 3000,
-  isRunning: false,
-  connStatus: 'disconnected',  // 'disconnected'|'connecting'|'connected'|'demo'
-  alertActive: false, beepCooldown: false,
-  history: [], periods: [], currentPeriod: null,
-  _ws: null, _pollInterval: null, _demoInterval: null,
-  // demo internals
-  _phase: 'rest', _phaseMs: 0, _phaseDur: 3000, _baseRPM: 0,
+  rpm:0, displayRPM:0,
+  targetRPM:null, tolerance:50, idleThreshold:30, gaugeMax:3000,
+  isRunning:false,
+  connStatus:'disconnected',
+  alertActive:false, beepCooldown:false,
+  history:[], periods:[], currentPeriod:null,
+  _ws:null, _pollInterval:null, _demoInterval:null,
+  _phase:'rest', _phaseMs:0, _phaseDur:3000, _baseRPM:0,
 };
 
-/* ── 2. LOCALSTORAGE ── */
+/* ── LocalStorage ── */
 function savLS() {
   try {
     localStorage.setItem('tach_h', JSON.stringify(S.history.slice(-MAX_HIST)));
     localStorage.setItem('tach_p', JSON.stringify(S.periods.slice(-500)));
     localStorage.setItem('tach_s', JSON.stringify({
-      targetRPM: S.targetRPM, tolerance: S.tolerance,
-      idleThreshold: S.idleThreshold, gaugeMax: S.gaugeMax,
+      targetRPM:S.targetRPM, tolerance:S.tolerance,
+      idleThreshold:S.idleThreshold, gaugeMax:S.gaugeMax,
     }));
-  } catch(e) {}
+  } catch(e){}
 }
 function loadLS() {
   try {
-    const h = localStorage.getItem('tach_h'); if (h) S.history  = JSON.parse(h);
-    const p = localStorage.getItem('tach_p'); if (p) S.periods  = JSON.parse(p);
-    const s = localStorage.getItem('tach_s');
-    if (s) {
-      const d = JSON.parse(s);
-      S.targetRPM     = d.targetRPM     ?? null;
-      S.tolerance     = d.tolerance      ?? 50;
-      S.idleThreshold = d.idleThreshold  ?? 30;
-      S.gaugeMax      = d.gaugeMax       ?? 3000;
-    }
-  } catch(e) {}
+    const h=localStorage.getItem('tach_h'); if(h) S.history=JSON.parse(h);
+    const p=localStorage.getItem('tach_p'); if(p) S.periods=JSON.parse(p);
+    const s=localStorage.getItem('tach_s');
+    if(s){const d=JSON.parse(s);S.targetRPM=d.targetRPM??null;S.tolerance=d.tolerance??50;S.idleThreshold=d.idleThreshold??30;S.gaugeMax=d.gaugeMax??3000;}
+  } catch(e){}
 }
 
-/* ══════════════════════════════════════════════════════
-   ── 3. ESP32 DATA SOURCE ──
-   ──────────────────────────────────────────────────────
-   Enter the ESP32 IP address in the input field and
-   choose WebSocket or HTTP Poll from the dropdown.
+/* ── Info box per protocol ── */
+const INFO = {
+  vercel: `<b>☁ Vercel Backend mode</b> — Works on any network. ESP32 sends data to this server.<br>
+    ESP32 Arduino code:<br>
+    <code>#include &lt;HTTPClient.h&gt;</code><br>
+    <code>HTTPClient http;</code><br>
+    <code>http.begin("https://YOUR-VERCEL-URL/api/rpm");</code><br>
+    <code>http.addHeader("Content-Type","application/json");</code><br>
+    <code>http.POST("{\\"rpm\\":"+String(readRPM())+"}");</code><br>
+    <code>http.end();</code>`,
 
-   ▸ WebSocket mode  →  connects to  ws://<IP>/ws
-     ESP32 must send JSON every ~1 s:  {"rpm": 1234}
+  ws: `<b>🔌 WebSocket mode</b> — ESP32 and browser must be on <b>same Wi-Fi</b>.<br>
+    Enter ESP32 IP (e.g. <code>192.168.1.100</code>). Connects to <code>ws://IP/ws</code>.<br>
+    ESP32 sends: <code>{"rpm": 1234}</code>`,
 
-     Minimal ESP32 Arduino code (WebSocketsServer lib):
-     ────────────────────────────────────────────────────
-     #include <WiFi.h>
-     #include <WebSocketsServer.h>
-     WebSocketsServer ws(80);
-     void setup(){ WiFi.begin(ssid,pass); ws.begin(); }
-     void loop(){
-       ws.loop();
-       String j="{\"rpm\":"+String(readRPM())+"}";
-       ws.broadcastTXT(j);
-       delay(1000);
-     }
+  http: `<b>🌐 HTTP Poll mode</b> — ESP32 and browser must be on <b>same Wi-Fi</b>.<br>
+    Enter ESP32 IP (e.g. <code>192.168.1.100</code>). Polls <code>http://IP/rpm</code> every 1s.<br>
+    ESP32 responds: <code>{"rpm": 1234}</code>  (add CORS header!)`,
+};
 
-   ▸ HTTP Poll mode  →  polls  GET http://<IP>/rpm  every 1 s
-     ESP32 must respond with JSON:  {"rpm": 1234}
-     NOTE: add CORS header so browser can fetch it.
+function onProtoChange() {
+  const p = document.getElementById('proto-select').value;
+  document.getElementById('info-box').innerHTML = INFO[p];
+  document.getElementById('device-id').placeholder =
+    p === 'vercel' ? 'No IP needed — uses Vercel backend' : 'ESP32 IP  e.g. 192.168.1.100';
+  if (p === 'vercel') document.getElementById('device-id').value = '';
+}
 
-     Minimal ESP32 Arduino code (WebServer lib):
-     ────────────────────────────────────────────────────
-     #include <WiFi.h>
-     #include <WebServer.h>
-     WebServer server(80);
-     void setup(){
-       WiFi.begin(ssid,pass);
-       server.on("/rpm",[](){
-         server.sendHeader("Access-Control-Allow-Origin","*");
-         server.send(200,"application/json",
-           "{\"rpm\":"+String(readRPM())+"}");
-       });
-       server.begin();
-     }
-     void loop(){ server.handleClient(); }
-══════════════════════════════════════════════════════ */
-
+/* ══════════════════════════════════════════════════
+   CONNECTION FUNCTIONS
+══════════════════════════════════════════════════ */
 function connectDevice() {
-  const ip = document.getElementById('device-id').value.trim();
-  if (!ip) { showToast('Enter ESP32 IP address first!'); return; }
-  cleanupConn();
   const proto = document.getElementById('proto-select').value;
+  const ip    = document.getElementById('device-id').value.trim();
+
+  if (proto !== 'vercel' && !ip) { showToast('Enter ESP32 IP address!'); return; }
+
+  cleanupConn();
   setStatus('connecting');
-  if (proto === 'ws') doWebSocket(ip);
-  else                doHTTP(ip);
+
+  if      (proto === 'vercel') doVercelPoll();
+  else if (proto === 'ws')     doWebSocket(ip);
+  else                         doHTTP(ip);
 }
 
-/* WebSocket connection */
-function doWebSocket(ip) {
-  const url = `ws://${ip}/ws`;
-  let ws;
-
-  // 6-second connection timeout
-  const tid = setTimeout(() => {
-    if (S.connStatus === 'connecting') {
-      if (ws) ws.close();
-      showToast('WebSocket timeout — try HTTP Poll mode');
-      setStatus('disconnected');
-      showDiscBtn(false);
-    }
-  }, 6000);
-
-  try {
-    ws = new WebSocket(url);
-    S._ws = ws;
-  } catch(e) {
-    clearTimeout(tid);
-    showToast('Invalid IP / cannot open WebSocket');
-    setStatus('disconnected'); return;
-  }
-
-  ws.onopen = () => {
-    clearTimeout(tid);
-    setStatus('connected');
-    showDiscBtn(true);
-    showToast('Connected to ESP32 via WebSocket ✓');
-  };
-
-  ws.onmessage = (e) => {
-    // Accept {"rpm":1234} or {"RPM":1234} or plain "1234"
-    try {
-      const d = JSON.parse(e.data);
-      pushRPM(typeof d === 'number' ? d : (d.rpm ?? d.RPM ?? 0));
-    } catch {
-      const n = parseFloat(e.data);
-      if (!isNaN(n)) pushRPM(n);
-    }
-  };
-
-  ws.onerror = () => { clearTimeout(tid); };
-
-  ws.onclose = () => {
-    clearTimeout(tid);
-    if (S.connStatus === 'connected') showToast('ESP32 disconnected');
-    setStatus('disconnected');
-    showDiscBtn(false);
-  };
-}
-
-/* HTTP Polling connection */
-function doHTTP(ip) {
+/* ── ☁ Vercel Backend polling (HTTPS safe, works globally) ── */
+function doVercelPoll() {
   let fails = 0;
 
   async function poll() {
     try {
-      const res = await fetch(`http://${ip}/rpm`,
-        { signal: AbortSignal.timeout(3000) });
+      const res = await fetch('/api/rpm', { signal: AbortSignal.timeout(5000) });
       if (!res.ok) throw new Error('HTTP ' + res.status);
-      const d   = await res.json();
-      const rpm = typeof d === 'number' ? d : (d.rpm ?? d.RPM ?? 0);
-      pushRPM(rpm);
+      const d = await res.json();
+
+      // Show stale warning if ESP32 hasn't posted recently
+      const stale = d.stale || false;
+      document.getElementById('stale-badge').style.display = stale ? '' : 'none';
+
+      pushRPM(d.rpm ?? 0);
       fails = 0;
+
       if (S.connStatus === 'connecting') {
         setStatus('connected');
         showDiscBtn(true);
-        showToast('Connected to ESP32 via HTTP ✓');
+        showToast('Connected via Vercel Backend ✓');
       }
     } catch(e) {
       fails++;
       if (S.connStatus === 'connecting' && fails >= 3) {
-        showToast('Cannot reach ESP32 at ' + ip);
-        cleanupConn(); setStatus('disconnected'); return;
-      }
-      if (S.connStatus === 'connected' && fails >= 5) {
-        showToast('ESP32 connection lost');
+        showToast('Cannot reach Vercel API — check deployment');
         cleanupConn(); setStatus('disconnected'); return;
       }
     }
   }
 
-  poll(); // immediate first call
+  poll();
   S._pollInterval = setInterval(poll, SAMPLE_MS);
 }
 
-/* Stop all connections */
-function cleanupConn() {
-  if (S._ws)           { S._ws.onclose = null; S._ws.close(); S._ws = null; }
-  if (S._pollInterval) { clearInterval(S._pollInterval); S._pollInterval = null; }
-  if (S._demoInterval) { clearInterval(S._demoInterval); S._demoInterval = null; }
+/* ── 🔌 WebSocket (direct to ESP32, local network) ── */
+function doWebSocket(ip) {
+  const url = `ws://${ip}/ws`;
+  let ws;
+  const tid = setTimeout(() => {
+    if (S.connStatus === 'connecting') {
+      if (ws) ws.close();
+      showToast('WebSocket timeout — try HTTP Poll or Vercel mode');
+      setStatus('disconnected'); showDiscBtn(false);
+    }
+  }, 6000);
+  try { ws = new WebSocket(url); S._ws = ws; }
+  catch(e) { clearTimeout(tid); showToast('Invalid IP'); setStatus('disconnected'); return; }
+  ws.onopen  = () => { clearTimeout(tid); setStatus('connected'); showDiscBtn(true); showToast('WebSocket connected ✓'); };
+  ws.onmessage = (e) => {
+    try {
+      const d = JSON.parse(e.data);
+      pushRPM(typeof d==='number'?d:(d.rpm??d.RPM??0));
+    } catch { const n=parseFloat(e.data); if(!isNaN(n)) pushRPM(n); }
+  };
+  ws.onerror = () => clearTimeout(tid);
+  ws.onclose = () => {
+    clearTimeout(tid);
+    if (S.connStatus==='connected') showToast('ESP32 disconnected');
+    setStatus('disconnected'); showDiscBtn(false);
+  };
 }
 
-/* ── 4. DEMO GENERATOR ── */
-function startDemo() {
-  cleanupConn();
-  setStatus('demo');
-  showDiscBtn(true);
-
-  S._phase = 'rest'; S._phaseMs = 0; S._phaseDur = 3000; S._baseRPM = 0;
-
-  function newPhase() {
-    S._phase   = S._phase === 'rest' ? 'running' : 'rest';
-    S._phaseMs = 0;
-    S._baseRPM = S._phase === 'running' ? 600 + Math.random() * 1000 : 0;
-    S._phaseDur = S._phase === 'running'
-      ? (10 + Math.random() * 20) * 1000
-      : (5  + Math.random() * 10) * 1000;
-  }
-
-  S._demoInterval = setInterval(() => {
-    S._phaseMs += SAMPLE_MS;
-    if (S._phaseMs >= S._phaseDur) newPhase();
-    let rpm = 0;
-    if (S._phase === 'running') {
-      const ramp = Math.min(S._phaseMs / 2000, 1);
-      rpm = Math.max(0, S._baseRPM * ramp + (Math.random()-.5)*160);
+/* ── 🌐 HTTP Polling (direct to ESP32, local network) ── */
+function doHTTP(ip) {
+  let fails = 0;
+  async function poll() {
+    try {
+      const res = await fetch(`http://${ip}/rpm`, { signal: AbortSignal.timeout(3000) });
+      if (!res.ok) throw new Error('HTTP '+res.status);
+      const d   = await res.json();
+      pushRPM(typeof d==='number'?d:(d.rpm??d.RPM??0));
+      fails = 0;
+      if (S.connStatus==='connecting') { setStatus('connected'); showDiscBtn(true); showToast('HTTP connected ✓'); }
+    } catch(e) {
+      fails++;
+      if (S.connStatus==='connecting' && fails>=3) { showToast('Cannot reach ESP32 at '+ip); cleanupConn(); setStatus('disconnected'); return; }
+      if (S.connStatus==='connected'  && fails>=5) { showToast('ESP32 connection lost');    cleanupConn(); setStatus('disconnected'); return; }
     }
+  }
+  poll(); S._pollInterval = setInterval(poll, SAMPLE_MS);
+}
+
+function cleanupConn() {
+  if (S._ws)           { S._ws.onclose=null; S._ws.close(); S._ws=null; }
+  if (S._pollInterval) { clearInterval(S._pollInterval); S._pollInterval=null; }
+  if (S._demoInterval) { clearInterval(S._demoInterval); S._demoInterval=null; }
+  document.getElementById('stale-badge').style.display = 'none';
+}
+
+function disconnectCleanup() {
+  cleanupConn(); hideAlert(); setStatus('disconnected'); showDiscBtn(false);
+}
+
+/* ── Demo mode ── */
+function startDemo() {
+  cleanupConn(); setStatus('demo'); showDiscBtn(true);
+  S._phase='rest'; S._phaseMs=0; S._phaseDur=3000; S._baseRPM=0;
+  function newPhase() {
+    S._phase = S._phase==='rest'?'running':'rest';
+    S._phaseMs=0;
+    S._baseRPM = S._phase==='running'?600+Math.random()*1000:0;
+    S._phaseDur = S._phase==='running'?(10+Math.random()*20)*1000:(5+Math.random()*10)*1000;
+  }
+  S._demoInterval = setInterval(()=>{
+    S._phaseMs+=SAMPLE_MS;
+    if(S._phaseMs>=S._phaseDur) newPhase();
+    let rpm=0;
+    if(S._phase==='running'){const r=Math.min(S._phaseMs/2000,1);rpm=Math.max(0,S._baseRPM*r+(Math.random()-.5)*160);}
     pushRPM(Math.round(rpm));
   }, SAMPLE_MS);
 }
 
-function disconnectCleanup() {
-  cleanupConn();
-  hideAlert();
-  setStatus('disconnected');
-  showDiscBtn(false);
-}
-
-/* ── 5. RPM PROCESSING ── */
+/* ── RPM processing ── */
 function pushRPM(rpm) {
-  rpm = Math.max(0, Math.round(rpm));
-  S.rpm = rpm;
-  const now       = Date.now();
-  const isRunning = rpm >= S.idleThreshold;
-  S.isRunning     = isRunning;
-
-  // History
-  S.history.push({ t: now, rpm });
-  if (S.history.length > MAX_HIST) S.history.splice(0, S.history.length - MAX_HIST);
-
-  // Period tracking
-  const pState = isRunning ? 'running' : 'rest';
-  if (!S.currentPeriod) {
-    S.currentPeriod = { state: pState, from: now, to: now, rpms: [rpm] };
-  } else if (S.currentPeriod.state !== pState) {
-    S.currentPeriod.to = now;
-    S.periods.unshift({ ...S.currentPeriod, rpms: [...S.currentPeriod.rpms] });
-    if (S.periods.length > 500) S.periods.pop();
-    S.currentPeriod = { state: pState, from: now, to: now, rpms: [rpm] };
-  } else {
-    S.currentPeriod.to = now;
-    S.currentPeriod.rpms.push(rpm);
-  }
-
-  // Alert
-  checkAlert(rpm, isRunning);
-
-  // Persist every 10 samples
-  if (S.history.length % 10 === 0) savLS();
-
-  // UI
-  updateLiveUI();
-  updateHistoryView();
-  renderPeriods();
+  rpm=Math.max(0,Math.round(rpm)); S.rpm=rpm;
+  const now=Date.now(), isRunning=rpm>=S.idleThreshold;
+  S.isRunning=isRunning;
+  S.history.push({t:now,rpm});
+  if(S.history.length>MAX_HIST) S.history.splice(0,S.history.length-MAX_HIST);
+  const ps=isRunning?'running':'rest';
+  if(!S.currentPeriod){ S.currentPeriod={state:ps,from:now,to:now,rpms:[rpm]}; }
+  else if(S.currentPeriod.state!==ps){
+    S.currentPeriod.to=now;
+    S.periods.unshift({...S.currentPeriod,rpms:[...S.currentPeriod.rpms]});
+    if(S.periods.length>500)S.periods.pop();
+    S.currentPeriod={state:ps,from:now,to:now,rpms:[rpm]};
+  } else { S.currentPeriod.to=now; S.currentPeriod.rpms.push(rpm); }
+  checkAlert(rpm,isRunning);
+  if(S.history.length%10===0) savLS();
+  updateLiveUI(); updateHistoryView(); renderPeriods();
 }
 
-function checkAlert(rpm, isRunning) {
-  if (!isRunning || S.targetRPM === null) { hideAlert(); return; }
-  const lo = S.targetRPM - S.tolerance, hi = S.targetRPM + S.tolerance;
-  if (rpm < lo || rpm > hi) showAlert(`RPM ${rpm} outside target ${S.targetRPM} ± ${S.tolerance}`);
+function checkAlert(rpm,isRunning){
+  if(!isRunning||S.targetRPM===null){hideAlert();return;}
+  const lo=S.targetRPM-S.tolerance,hi=S.targetRPM+S.tolerance;
+  if(rpm<lo||rpm>hi) showAlert(`RPM ${rpm} outside target ${S.targetRPM} ± ${S.tolerance}`);
   else hideAlert();
 }
 
-/* ── 6. GAUGE CANVAS ── */
-const gC = document.getElementById('gauge-canvas').getContext('2d');
-function animateGauge() {
-  S.displayRPM += (S.rpm - S.displayRPM) * .12;
-  if (Math.abs(S.rpm - S.displayRPM) < .5) S.displayRPM = S.rpm;
+/* ── Gauge canvas ── */
+const gC=document.getElementById('gauge-canvas').getContext('2d');
+function animateGauge(){
+  S.displayRPM+=(S.rpm-S.displayRPM)*.12;
+  if(Math.abs(S.rpm-S.displayRPM)<.5)S.displayRPM=S.rpm;
   drawGauge(S.displayRPM);
   requestAnimationFrame(animateGauge);
 }
-
-function drawGauge(rpm) {
-  const cv  = document.getElementById('gauge-canvas');
-  const W   = cv.offsetWidth;
-  const dpr = devicePixelRatio || 1;
-  if (cv.width !== W*dpr || cv.height !== W*.67*dpr) {
-    cv.width  = W*dpr; cv.height = W*.67*dpr; cv.style.height = (W*.67)+'px';
+function drawGauge(rpm){
+  const cv=document.getElementById('gauge-canvas');
+  const W=cv.offsetWidth,dpr=devicePixelRatio||1;
+  if(cv.width!==W*dpr||cv.height!==W*.67*dpr){cv.width=W*dpr;cv.height=W*.67*dpr;cv.style.height=(W*.67)+'px';}
+  const ctx=gC,cw=cv.width,ch=cv.height;
+  ctx.clearRect(0,0,cw,ch);
+  const cx=cw/2,cy=ch*.57,R=Math.min(cw,ch)*.42;
+  const sA=210*Math.PI/180,sweep=240*Math.PI/180,eA=330*Math.PI/180;
+  const frac=Math.min(rpm,S.gaugeMax)/S.gaugeMax,nA=sA+frac*sweep;
+  ctx.beginPath();ctx.arc(cx,cy,R,sA,eA);ctx.strokeStyle='#1e3054';ctx.lineWidth=R*.12;ctx.lineCap='round';ctx.stroke();
+  if(frac>.001){ctx.beginPath();ctx.arc(cx,cy,R,sA,nA);ctx.strokeStyle='#ff9f1a';ctx.lineWidth=R*.12;ctx.lineCap='round';ctx.stroke();}
+  const tc=7;
+  for(let i=0;i<tc;i++){
+    const fr=i/(tc-1),a=sA+fr*sweep;
+    if(i<tc-1)for(let m=1;m<5;m++){const ma=sA+((i+m/5)/(tc-1))*sweep;ctx.beginPath();ctx.moveTo(cx+Math.cos(ma)*R*.84,cy+Math.sin(ma)*R*.84);ctx.lineTo(cx+Math.cos(ma)*R*.92,cy+Math.sin(ma)*R*.92);ctx.strokeStyle='#1e3054';ctx.lineWidth=dpr;ctx.stroke();}
+    ctx.beginPath();ctx.moveTo(cx+Math.cos(a)*R*.78,cy+Math.sin(a)*R*.78);ctx.lineTo(cx+Math.cos(a)*R*.94,cy+Math.sin(a)*R*.94);ctx.strokeStyle='#2d4a7a';ctx.lineWidth=1.5*dpr;ctx.stroke();
+    const lv=Math.round(S.gaugeMax/(tc-1)*i);
+    ctx.fillStyle='#64748b';ctx.font=`${Math.max(9,R*.11)}px Inter,sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(lv>=1000?(lv/1000).toFixed(0)+'k':String(lv),cx+Math.cos(a)*R*.63,cy+Math.sin(a)*R*.63);
   }
-  const ctx = gC;
-  const cw  = cv.width, ch = cv.height;
-  ctx.clearRect(0, 0, cw, ch);
-  const cx = cw/2, cy = ch*.57, R = Math.min(cw,ch)*.42;
-  const sA = 210*Math.PI/180, eA = 330*Math.PI/180, sweep = 240*Math.PI/180;
-  const frac = Math.min(rpm, S.gaugeMax) / S.gaugeMax;
-  const nA   = sA + frac * sweep;
-
-  // Track
-  ctx.beginPath(); ctx.arc(cx,cy,R,sA,eA);
-  ctx.strokeStyle='#1e3054'; ctx.lineWidth=R*.12; ctx.lineCap='round'; ctx.stroke();
-  // Fill
-  if (frac>.001) {
-    ctx.beginPath(); ctx.arc(cx,cy,R,sA,nA);
-    ctx.strokeStyle='#ff9f1a'; ctx.lineWidth=R*.12; ctx.lineCap='round'; ctx.stroke();
-  }
-  // Ticks
-  const tc = 7;
-  for (let i=0; i<tc; i++) {
-    const fr = i/(tc-1), a = sA+fr*sweep;
-    // minor ticks
-    if (i<tc-1) for (let m=1;m<5;m++) {
-      const ma=sA+((i+m/5)/(tc-1))*sweep;
-      ctx.beginPath(); ctx.moveTo(cx+Math.cos(ma)*R*.84,cy+Math.sin(ma)*R*.84);
-      ctx.lineTo(cx+Math.cos(ma)*R*.92,cy+Math.sin(ma)*R*.92);
-      ctx.strokeStyle='#1e3054'; ctx.lineWidth=dpr; ctx.stroke();
-    }
-    // major tick
-    ctx.beginPath(); ctx.moveTo(cx+Math.cos(a)*R*.78,cy+Math.sin(a)*R*.78);
-    ctx.lineTo(cx+Math.cos(a)*R*.94,cy+Math.sin(a)*R*.94);
-    ctx.strokeStyle='#2d4a7a'; ctx.lineWidth=1.5*dpr; ctx.stroke();
-    // label
-    const lv = Math.round(S.gaugeMax/(tc-1)*i);
-    ctx.fillStyle='#64748b'; ctx.font=`${Math.max(9,R*.11)}px Inter,sans-serif`;
-    ctx.textAlign='center'; ctx.textBaseline='middle';
-    ctx.fillText(lv>=1000?(lv/1000).toFixed(0)+'k':String(lv),
-      cx+Math.cos(a)*R*.63, cy+Math.sin(a)*R*.63);
-  }
-  // Needle
-  ctx.save(); ctx.translate(cx,cy); ctx.rotate(nA);
-  ctx.beginPath(); ctx.moveTo(-R*.18,0); ctx.lineTo(R*.82,0);
-  ctx.strokeStyle='#ff9f1a'; ctx.lineWidth=3*dpr; ctx.lineCap='round'; ctx.stroke();
-  ctx.restore();
-  // Hub
-  ctx.beginPath(); ctx.arc(cx,cy,R*.07,0,Math.PI*2); ctx.fillStyle='#ff9f1a'; ctx.fill();
-  ctx.beginPath(); ctx.arc(cx,cy,R*.035,0,Math.PI*2); ctx.fillStyle='#0b1220'; ctx.fill();
-  // RPM number
-  ctx.fillStyle='#e2e8f0'; ctx.font=`bold ${R*.28}px Inter,sans-serif`;
-  ctx.textAlign='center'; ctx.textBaseline='middle';
-  ctx.fillText(Math.round(rpm).toLocaleString(), cx, cy+R*.3);
-  ctx.fillStyle='#64748b'; ctx.font=`${R*.11}px Inter,sans-serif`;
-  ctx.fillText('RPM', cx, cy+R*.45);
+  ctx.save();ctx.translate(cx,cy);ctx.rotate(nA);ctx.beginPath();ctx.moveTo(-R*.18,0);ctx.lineTo(R*.82,0);ctx.strokeStyle='#ff9f1a';ctx.lineWidth=3*dpr;ctx.lineCap='round';ctx.stroke();ctx.restore();
+  ctx.beginPath();ctx.arc(cx,cy,R*.07,0,Math.PI*2);ctx.fillStyle='#ff9f1a';ctx.fill();
+  ctx.beginPath();ctx.arc(cx,cy,R*.035,0,Math.PI*2);ctx.fillStyle='#0b1220';ctx.fill();
+  ctx.fillStyle='#e2e8f0';ctx.font=`bold ${R*.28}px Inter,sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText(Math.round(rpm).toLocaleString(),cx,cy+R*.3);
+  ctx.fillStyle='#64748b';ctx.font=`${R*.11}px Inter,sans-serif`;ctx.fillText('RPM',cx,cy+R*.45);
 }
 
-/* ── 7. HISTORY CHART ── */
-const hC = document.getElementById('history-canvas').getContext('2d');
-
-function getFiltered() {
-  const m = parseInt(document.getElementById('range-select').value);
-  if (!m) return S.history;
-  const cut = Date.now() - m*60*1000;
-  return S.history.filter(p => p.t >= cut);
+/* ── History chart ── */
+const hC=document.getElementById('history-canvas').getContext('2d');
+function getFiltered(){
+  const m=parseInt(document.getElementById('range-select').value);
+  if(!m)return S.history;
+  return S.history.filter(p=>p.t>=Date.now()-m*60*1000);
 }
-
-function drawHistory() {
-  const cv = document.getElementById('history-canvas');
-  const W  = cv.offsetWidth, H = 160, dpr = devicePixelRatio||1;
-  cv.width = W*dpr; cv.height = H*dpr; cv.style.height = H+'px';
-  const ctx = hC;
-  ctx.fillStyle='#0d1926';
-  ctx.beginPath(); ctx.roundRect(0,0,cv.width,cv.height,8*dpr); ctx.fill();
-
-  const data = getFiltered();
-  const pad  = {t:14*dpr, r:14*dpr, b:28*dpr, l:44*dpr};
-  const cw   = cv.width-pad.l-pad.r, ch = cv.height-pad.t-pad.b;
-
-  if (data.length < 2) {
-    ctx.fillStyle='#64748b'; ctx.font=`${12*dpr}px Inter,sans-serif`;
-    ctx.textAlign='center'; ctx.textBaseline='middle';
-    ctx.fillText('No data for selected range', cv.width/2, cv.height/2); return;
-  }
-
-  const minT=data[0].t, maxT=data[data.length-1].t;
+function drawHistory(){
+  const cv=document.getElementById('history-canvas');
+  const W=cv.offsetWidth,H=160,dpr=devicePixelRatio||1;
+  cv.width=W*dpr;cv.height=H*dpr;cv.style.height=H+'px';
+  const ctx=hC;
+  ctx.fillStyle='#0d1926';ctx.beginPath();ctx.roundRect(0,0,cv.width,cv.height,8*dpr);ctx.fill();
+  const data=getFiltered(),pad={t:14*dpr,r:14*dpr,b:28*dpr,l:44*dpr};
+  const cw=cv.width-pad.l-pad.r,ch=cv.height-pad.t-pad.b;
+  if(data.length<2){ctx.fillStyle='#64748b';ctx.font=`${12*dpr}px Inter,sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('No data for selected range',cv.width/2,cv.height/2);return;}
+  const minT=data[0].t,maxT=data[data.length-1].t;
   const maxV=Math.max(S.gaugeMax,...data.map(p=>p.rpm));
   const toX=t=>pad.l+((t-minT)/(maxT-minT||1))*cw;
-  const toY=v=>pad.t+ch-((v)/(maxV||1))*ch;
-
-  // Grid
-  ctx.setLineDash([3*dpr,4*dpr]); ctx.strokeStyle='#1e3054'; ctx.lineWidth=dpr;
-  for (let i=0;i<=4;i++) {
-    const y=pad.t+ch/4*i;
-    ctx.beginPath(); ctx.moveTo(pad.l,y); ctx.lineTo(pad.l+cw,y); ctx.stroke();
-    const v=Math.round(maxV-maxV/4*i);
-    ctx.fillStyle='#64748b'; ctx.font=`${10*dpr}px Inter,sans-serif`;
-    ctx.textAlign='right'; ctx.textBaseline='middle';
-    ctx.fillText(v>=1000?(v/1000).toFixed(1)+'k':v, pad.l-4*dpr, y);
-  }
+  const toY=v=>pad.t+ch-(v/(maxV||1))*ch;
+  ctx.setLineDash([3*dpr,4*dpr]);ctx.strokeStyle='#1e3054';ctx.lineWidth=dpr;
+  for(let i=0;i<=4;i++){const y=pad.t+ch/4*i;ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(pad.l+cw,y);ctx.stroke();const v=Math.round(maxV-maxV/4*i);ctx.fillStyle='#64748b';ctx.font=`${10*dpr}px Inter,sans-serif`;ctx.textAlign='right';ctx.textBaseline='middle';ctx.fillText(v>=1000?(v/1000).toFixed(1)+'k':v,pad.l-4*dpr,y);}
   ctx.setLineDash([]);
-
-  // Idle threshold line
-  ctx.beginPath(); ctx.moveTo(pad.l,toY(S.idleThreshold)); ctx.lineTo(pad.l+cw,toY(S.idleThreshold));
-  ctx.strokeStyle='rgba(100,116,139,.4)'; ctx.lineWidth=dpr;
-  ctx.setLineDash([5*dpr,5*dpr]); ctx.stroke(); ctx.setLineDash([]);
-
-  // Target line
-  if (S.targetRPM !== null) {
-    ctx.beginPath(); ctx.moveTo(pad.l,toY(S.targetRPM)); ctx.lineTo(pad.l+cw,toY(S.targetRPM));
-    ctx.strokeStyle='rgba(255,159,26,.35)'; ctx.lineWidth=1.5*dpr;
-    ctx.setLineDash([6*dpr,4*dpr]); ctx.stroke(); ctx.setLineDash([]);
-  }
-
-  // Line + fill
-  ctx.beginPath(); ctx.moveTo(toX(data[0].t), toY(data[0].rpm));
-  for (let i=1;i<data.length;i++) ctx.lineTo(toX(data[i].t), toY(data[i].rpm));
-  ctx.strokeStyle='#ff9f1a'; ctx.lineWidth=2*dpr; ctx.lineJoin='round'; ctx.stroke();
-  ctx.lineTo(toX(data[data.length-1].t), pad.t+ch);
-  ctx.lineTo(pad.l, pad.t+ch); ctx.closePath();
-  const g=ctx.createLinearGradient(0,pad.t,0,pad.t+ch);
-  g.addColorStop(0,'rgba(255,159,26,.25)'); g.addColorStop(1,'rgba(255,159,26,0)');
-  ctx.fillStyle=g; ctx.fill();
-
-  // X labels
-  ctx.fillStyle='#64748b'; ctx.font=`${10*dpr}px Inter,sans-serif`;
-  ctx.textAlign='center'; ctx.textBaseline='top';
-  for (let i=0;i<=4;i++) {
-    const t=minT+(maxT-minT)*(i/4), d=new Date(t);
-    ctx.fillText(d.toTimeString().slice(0,8), toX(t), pad.t+ch+4*dpr);
-  }
+  ctx.beginPath();ctx.moveTo(pad.l,toY(S.idleThreshold));ctx.lineTo(pad.l+cw,toY(S.idleThreshold));ctx.strokeStyle='rgba(100,116,139,.4)';ctx.lineWidth=dpr;ctx.setLineDash([5*dpr,5*dpr]);ctx.stroke();ctx.setLineDash([]);
+  if(S.targetRPM!==null){ctx.beginPath();ctx.moveTo(pad.l,toY(S.targetRPM));ctx.lineTo(pad.l+cw,toY(S.targetRPM));ctx.strokeStyle='rgba(255,159,26,.35)';ctx.lineWidth=1.5*dpr;ctx.setLineDash([6*dpr,4*dpr]);ctx.stroke();ctx.setLineDash([]);}
+  ctx.beginPath();ctx.moveTo(toX(data[0].t),toY(data[0].rpm));
+  for(let i=1;i<data.length;i++)ctx.lineTo(toX(data[i].t),toY(data[i].rpm));
+  ctx.strokeStyle='#ff9f1a';ctx.lineWidth=2*dpr;ctx.lineJoin='round';ctx.stroke();
+  ctx.lineTo(toX(data[data.length-1].t),pad.t+ch);ctx.lineTo(pad.l,pad.t+ch);ctx.closePath();
+  const g=ctx.createLinearGradient(0,pad.t,0,pad.t+ch);g.addColorStop(0,'rgba(255,159,26,.25)');g.addColorStop(1,'rgba(255,159,26,0)');ctx.fillStyle=g;ctx.fill();
+  ctx.fillStyle='#64748b';ctx.font=`${10*dpr}px Inter,sans-serif`;ctx.textAlign='center';ctx.textBaseline='top';
+  for(let i=0;i<=4;i++){const t=minT+(maxT-minT)*(i/4),d=new Date(t);ctx.fillText(d.toTimeString().slice(0,8),toX(t),pad.t+ch+4*dpr);}
 }
 
-/* ── 8. PERIODS TABLE ── */
-function renderPeriods() {
-  const tb = document.getElementById('periods-body');
-  let all  = [...S.periods];
-  if (S.currentPeriod) all.unshift({...S.currentPeriod});
-  if (!all.length) { tb.innerHTML='<tr><td colspan="6" class="no-data">No periods recorded yet.</td></tr>'; return; }
-  tb.innerHTML = all.map(p => {
-    const run = p.state==='running';
-    const avg = p.rpms.length ? Math.round(p.rpms.reduce((a,b)=>a+b,0)/p.rpms.length) : 0;
-    const mx  = p.rpms.length ? Math.max(...p.rpms) : 0;
-    return `<tr>
-      <td><span class="badge ${p.state}">${run?'Running':'Rest'}</span></td>
-      <td>${fmtDate(p.from)}</td><td>${fmtDate(p.to)}</td>
-      <td>${fmtDur(p.to-p.from)}</td>
-      <td>${run?avg:'—'}</td><td>${run?mx:'—'}</td>
-    </tr>`;
+/* ── Periods table ── */
+function renderPeriods(){
+  const tb=document.getElementById('periods-body');
+  let all=[...S.periods];
+  if(S.currentPeriod)all.unshift({...S.currentPeriod});
+  if(!all.length){tb.innerHTML='<tr><td colspan="6" class="no-data">No periods recorded yet.</td></tr>';return;}
+  tb.innerHTML=all.map(p=>{
+    const run=p.state==='running';
+    const avg=p.rpms.length?Math.round(p.rpms.reduce((a,b)=>a+b,0)/p.rpms.length):0;
+    const mx=p.rpms.length?Math.max(...p.rpms):0;
+    return `<tr><td><span class="badge ${p.state}">${run?'Running':'Rest'}</span></td><td>${fmtDate(p.from)}</td><td>${fmtDate(p.to)}</td><td>${fmtDur(p.to-p.from)}</td><td>${run?avg:'—'}</td><td>${run?mx:'—'}</td></tr>`;
   }).join('');
 }
 
-/* ── 9. STATS ── */
-function updateStats() {
-  const data = getFiltered();
-  const set  = (id,v) => document.getElementById(id).textContent = v;
-  if (!data.length) { ['hs-max','hs-min','hs-avg','hs-run','hs-rest','hs-tgt'].forEach(i=>set(i,'—')); return; }
-  const runPts  = data.filter(p=>p.rpm>=S.idleThreshold);
-  const restPts = data.filter(p=>p.rpm<S.idleThreshold);
-  set('hs-max',  Math.max(...data.map(p=>p.rpm)));
-  set('hs-min',  runPts.length ? Math.min(...runPts.map(p=>p.rpm)) : '—');
-  set('hs-avg',  runPts.length ? Math.round(runPts.reduce((a,p)=>a+p.rpm,0)/runPts.length) : '—');
-  set('hs-run',  fmtDur(runPts.length*1000));
-  set('hs-rest', fmtDur(restPts.length*1000));
-  if (S.targetRPM===null) { set('hs-tgt','set a target'); return; }
-  const lo=S.targetRPM-S.tolerance, hi=S.targetRPM+S.tolerance;
-  set('hs-tgt', fmtDur(runPts.filter(p=>p.rpm>=lo&&p.rpm<=hi).length*1000));
+/* ── Stats ── */
+function updateStats(){
+  const data=getFiltered(),set=(id,v)=>document.getElementById(id).textContent=v;
+  if(!data.length){['hs-max','hs-min','hs-avg','hs-run','hs-rest','hs-tgt'].forEach(i=>set(i,'—'));return;}
+  const runPts=data.filter(p=>p.rpm>=S.idleThreshold),restPts=data.filter(p=>p.rpm<S.idleThreshold);
+  set('hs-max',Math.max(...data.map(p=>p.rpm)));
+  set('hs-min',runPts.length?Math.min(...runPts.map(p=>p.rpm)):'—');
+  set('hs-avg',runPts.length?Math.round(runPts.reduce((a,p)=>a+p.rpm,0)/runPts.length):'—');
+  set('hs-run',fmtDur(runPts.length*1000));set('hs-rest',fmtDur(restPts.length*1000));
+  if(S.targetRPM===null){set('hs-tgt','set a target');return;}
+  const lo=S.targetRPM-S.tolerance,hi=S.targetRPM+S.tolerance;
+  set('hs-tgt',fmtDur(runPts.filter(p=>p.rpm>=lo&&p.rpm<=hi).length*1000));
 }
 
-/* ── 10. SETTINGS ── */
-function loadSettingsUI() {
-  document.getElementById('set-target').value = S.targetRPM ?? '';
-  document.getElementById('set-tol').value    = S.tolerance;
-  document.getElementById('set-idle').value   = S.idleThreshold;
-  document.getElementById('set-gmax').value   = S.gaugeMax;
-}
-function saveSettings() {
-  const t = document.getElementById('set-target').value;
-  S.targetRPM     = t!=='' ? parseFloat(t) : null;
-  S.tolerance     = parseFloat(document.getElementById('set-tol').value)  || 50;
-  S.idleThreshold = parseFloat(document.getElementById('set-idle').value) || 30;
-  S.gaugeMax      = parseFloat(document.getElementById('set-gmax').value) || 3000;
-  savLS(); showToast('Settings saved ✓');
+/* ── Settings ── */
+function loadSettingsUI(){document.getElementById('set-target').value=S.targetRPM??'';document.getElementById('set-tol').value=S.tolerance;document.getElementById('set-idle').value=S.idleThreshold;document.getElementById('set-gmax').value=S.gaugeMax;}
+function saveSettings(){
+  const t=document.getElementById('set-target').value;
+  S.targetRPM=t!==''?parseFloat(t):null;
+  S.tolerance=parseFloat(document.getElementById('set-tol').value)||50;
+  S.idleThreshold=parseFloat(document.getElementById('set-idle').value)||30;
+  S.gaugeMax=parseFloat(document.getElementById('set-gmax').value)||3000;
+  savLS();showToast('Settings saved ✓');
 }
 
-/* ── 11. EXPORT CSV ── */
-function exportCSV() {
-  if (!S.history.length) { showToast('No data to export.'); return; }
+/* ── CSV ── */
+function exportCSV(){
+  if(!S.history.length){showToast('No data to export.');return;}
   const rows=[['Timestamp','RPM','State']];
-  S.history.forEach(p=>rows.push([new Date(p.t).toISOString(), p.rpm, p.rpm>=S.idleThreshold?'Running':'Idle']));
+  S.history.forEach(p=>rows.push([new Date(p.t).toISOString(),p.rpm,p.rpm>=S.idleThreshold?'Running':'Idle']));
   const blob=new Blob([rows.map(r=>r.join(',')).join('\r\n')],{type:'text/csv'});
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);
-  a.download=`tachometer_${new Date().toISOString().slice(0,10)}.csv`;
-  a.click(); URL.revokeObjectURL(a.href);
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`tachometer_${new Date().toISOString().slice(0,10)}.csv`;a.click();URL.revokeObjectURL(a.href);
 }
 
-/* ── 12. UI HELPERS ── */
-function setStatus(mode) {
-  S.connStatus = mode;
-  const pill = document.getElementById('status-pill');
-  const txt  = document.getElementById('status-text');
-  pill.className = 'pill';
-  const labels = {disconnected:'Disconnected',connecting:'Connecting…',connected:'Connected',demo:'Demo mode'};
-  txt.textContent = labels[mode] || mode;
-  if (mode==='connected') pill.classList.add('connected');
-  if (mode==='demo')      pill.classList.add('demo');
-  if (mode==='connecting') pill.classList.add('connecting');
+/* ── UI helpers ── */
+function setStatus(m){
+  S.connStatus=m;
+  const pill=document.getElementById('status-pill'),txt=document.getElementById('status-text');
+  pill.className='pill';
+  txt.textContent={disconnected:'Disconnected',connecting:'Connecting…',connected:'Connected',demo:'Demo mode'}[m]||m;
+  if(m==='connected')pill.classList.add('connected');
+  if(m==='demo')pill.classList.add('demo');
+  if(m==='connecting')pill.classList.add('connecting');
 }
-
-function showDiscBtn(show) {
-  document.getElementById('disc-btn').style.display = show ? '' : 'none';
+function showDiscBtn(s){document.getElementById('disc-btn').style.display=s?'':'none';}
+function showAlert(msg){document.getElementById('alert-msg').textContent=msg;if(!S.alertActive){S.alertActive=true;document.getElementById('alert-banner').classList.add('visible');beep();}}
+function hideAlert(){if(S.alertActive){S.alertActive=false;document.getElementById('alert-banner').classList.remove('visible');}}
+let _ac;
+function beep(){
+  if(S.beepCooldown)return;S.beepCooldown=true;setTimeout(()=>S.beepCooldown=false,3000);
+  try{if(!_ac)_ac=new(window.AudioContext||window.webkitAudioContext)();const o=_ac.createOscillator(),g=_ac.createGain();o.connect(g);g.connect(_ac.destination);o.frequency.value=880;o.type='square';g.gain.setValueAtTime(.3,_ac.currentTime);g.gain.exponentialRampToValueAtTime(.001,_ac.currentTime+.4);o.start();o.stop(_ac.currentTime+.4);}catch(e){}
 }
-
-function showAlert(msg) {
-  document.getElementById('alert-msg').textContent = msg;
-  if (!S.alertActive) { S.alertActive=true; document.getElementById('alert-banner').classList.add('visible'); beep(); }
-}
-function hideAlert() {
-  if (S.alertActive) { S.alertActive=false; document.getElementById('alert-banner').classList.remove('visible'); }
-}
-
-let _actx;
-function beep() {
-  if (S.beepCooldown) return;
-  S.beepCooldown=true; setTimeout(()=>S.beepCooldown=false, 3000);
-  try {
-    if (!_actx) _actx=new(window.AudioContext||window.webkitAudioContext)();
-    const o=_actx.createOscillator(), g=_actx.createGain();
-    o.connect(g); g.connect(_actx.destination);
-    o.frequency.value=880; o.type='square';
-    g.gain.setValueAtTime(.3,_actx.currentTime);
-    g.gain.exponentialRampToValueAtTime(.001,_actx.currentTime+.4);
-    o.start(); o.stop(_actx.currentTime+.4);
-  } catch(e){}
-}
-
-function showToast(msg) {
+function showToast(msg){
   const el=document.createElement('div');
   el.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#16253d;border:1px solid #ff9f1a;color:#ff9f1a;padding:9px 18px;border-radius:8px;font-size:.83rem;font-weight:600;z-index:800;transition:opacity .4s;box-shadow:0 4px 20px rgba(0,0,0,.4)';
-  el.textContent=msg; document.body.appendChild(el);
-  setTimeout(()=>{ el.style.opacity='0'; setTimeout(()=>el.remove(),400); },2400);
+  el.textContent=msg;document.body.appendChild(el);
+  setTimeout(()=>{el.style.opacity='0';setTimeout(()=>el.remove(),400);},2400);
 }
+function openModal(){document.getElementById('modal-overlay').classList.add('visible');}
+function closeModal(){document.getElementById('modal-overlay').classList.remove('visible');}
+function confirmClear(){S.history=[];S.periods=[];S.currentPeriod=null;savLS();closeModal();updateHistoryView();renderPeriods();showToast('History cleared.');}
+function updateLiveUI(){
+  document.getElementById('tile-rpm').textContent=S.rpm.toLocaleString();
+  const el=document.getElementById('tile-state');el.textContent=S.isRunning?'Running':'Idle';el.className='tile-value '+(S.isRunning?'running':'idle');
+}
+function updateHistoryView(){drawHistory();updateStats();}
+function fmtDate(ts){const d=new Date(ts);return `${d.getDate()} ${d.toLocaleString('en',{month:'short'})}, ${d.toTimeString().slice(0,8)}`;}
+function fmtDur(ms){const s=Math.round(ms/1000);if(s<60)return s+'s';const m=Math.floor(s/60),r=s%60;if(m<60)return r?`${m}m ${r}s`:`${m}m`;const h=Math.floor(m/60),rm=m%60;return rm?`${h}h ${rm}m`:`${h}h`;}
 
-function openModal()  { document.getElementById('modal-overlay').classList.add('visible'); }
-function closeModal() { document.getElementById('modal-overlay').classList.remove('visible'); }
-function confirmClear() {
-  S.history=[]; S.periods=[]; S.currentPeriod=null; savLS(); closeModal();
-  updateHistoryView(); renderPeriods(); showToast('History cleared.');
-}
-
-function updateLiveUI() {
-  document.getElementById('tile-rpm').textContent = S.rpm.toLocaleString();
-  const el = document.getElementById('tile-state');
-  el.textContent = S.isRunning ? 'Running' : 'Idle';
-  el.className   = 'tile-value ' + (S.isRunning ? 'running' : 'idle');
-}
-function updateHistoryView() { drawHistory(); updateStats(); }
-
-function fmtDate(ts) {
-  const d=new Date(ts);
-  return `${d.getDate()} ${d.toLocaleString('en',{month:'short'})}, ${d.toTimeString().slice(0,8)}`;
-}
-function fmtDur(ms) {
-  const s=Math.round(ms/1000);
-  if (s<60) return s+'s';
-  const m=Math.floor(s/60), r=s%60;
-  if (m<60) return r ? `${m}m ${r}s` : `${m}m`;
-  const h=Math.floor(m/60), rm=m%60;
-  return rm ? `${h}h ${rm}m` : `${h}h`;
-}
-
-/* ── 13. INIT ── */
-function init() {
-  loadLS(); loadSettingsUI();
-  setTimeout(()=>document.getElementById('splash').classList.add('hidden'), 2000);
-  animateGauge();
-  updateHistoryView(); renderPeriods(); updateLiveUI();
-  window.addEventListener('resize', updateHistoryView);
+/* ── Init ── */
+function init(){
+  loadLS(); loadSettingsUI(); onProtoChange();
+  setTimeout(()=>document.getElementById('splash').classList.add('hidden'),2000);
+  animateGauge(); updateHistoryView(); renderPeriods(); updateLiveUI();
+  window.addEventListener('resize',updateHistoryView);
 }
 init();
 </script>
